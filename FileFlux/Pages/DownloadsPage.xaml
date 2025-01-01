@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:FileFlux"
+             xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"
+             xmlns:model="clr-namespace:FileFlux.Model"
+             x:DataType="viewmodel:DownloadsViewModel"
+             xmlns:strings="clr-namespace:FileFlux.Localization"
+             x:Class="FileFlux.DownloadsPage"             
+             BackgroundColor="Transparent"
+             Title="Downloads - FileFlux">
+    <ContentPage.Resources>
+        <local:FileSizeConverter x:Key="FileSizeConverter" />
+    </ContentPage.Resources>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding NewDownload}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FAS" Glyph="&#xf019;" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+        <ToolbarItem Command="{Binding PauseDownload}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FAS" Glyph="&#xf04c;" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+        <ToolbarItem Command="{Binding ClearDownloads}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FAS" Glyph="&#xf51a;" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <HorizontalStackLayout MinimumHeightRequest="32" HorizontalOptions="StartAndExpand">
+            <ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding NewDownload}">
+                <ImageButton.Source>
+                    <FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf019;"/>
+                </ImageButton.Source>
+            </ImageButton>
+            <BoxView HeightRequest="28" WidthRequest="1"  Color="Grey" VerticalOptions="FillAndExpand"/>
+            <ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding CancelDownload}">
+                <ImageButton.Source>
+                    <FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf05e;"/>
+                </ImageButton.Source>
+            </ImageButton>
+            <ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding ToggleDownloadStatus}" IsVisible="True">
+                <ImageButton.Source>
+                    <FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf04c;" />
+                </ImageButton.Source>
+                <ImageButton.Triggers>
+                    <DataTrigger Binding="{Binding SelectedItem?.Status}" Value="{x:Static model:FileDownloadStatuses.InProgress}" TargetType="ImageButton">
+                        <Setter Property="IsVisible" Value="True"/>
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+            <BoxView HeightRequest="28" WidthRequest="1"  Color="Grey" VerticalOptions="FillAndExpand" />
+            <ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding ClearDownloads}">
+                <ImageButton.Source>
+                    <FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf51a;" />
+                </ImageButton.Source>
+            </ImageButton>
+        </HorizontalStackLayout>
+        <ScrollView BackgroundColor="Transparent" Grid.Row="1">
+            <ListView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                <ListView.Header>
+                    <BoxView HorizontalOptions="FillAndExpand" HeightRequest="1" Color="Grey" />
+                </ListView.Header>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="model:FileDownload">
+                        <ViewCell>
+                            <Grid RowSpacing="16" ColumnSpacing="16" BackgroundColor="Transparent" Padding="16">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Image Grid.Column="0">
+                                    <Image.Source>
+                                        <FontImageSource FontFamily="FAS" Glyph="&#xf15b;" Size="64" />
+                                    </Image.Source>
+                                </Image>
+                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Start">
+                                    <Label Text="{Binding FileName}" FontSize="Small" />
+                                    <Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="Micro">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
+                                                <Setter Property="TextColor" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}">
+                                                <Setter Property="TextColor" Value="LightGreen"/>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Text="{Binding PercentCompleted,StringFormat='Percent Completed: {0:F2}%'}" FontSize="Micro" />
+                                    <Label Text="{Binding TotalSize, Converter={StaticResource FileSizeConverter}}" FontSize="Micro" />
+                                </VerticalStackLayout>
+                                <BoxView Color="White" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" HeightRequest="1" Margin="10,0" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

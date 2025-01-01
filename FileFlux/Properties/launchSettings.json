@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Windows Machine": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false
+    },
+    "ArgumentsP": {
+      "commandName": "Project",
+      "commandLineArgs": "fileflux://test.com/file.txt",
+      "authenticationMode": "None"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="FileFlux.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:local="clr-namespace:FileFlux"
+    Shell.FlyoutBehavior="Flyout"    
+    Title="FileFlux">    
+    <Shell.FlyoutIcon>
+        <FileImageSource File="filefluxicon.ico"/>
+    </Shell.FlyoutIcon>
+    <FlyoutItem Title="Downloads">
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource />
+        </FlyoutItem.FlyoutIcon>
+        <ShellContent Title="Downloads" ContentTemplate="{DataTemplate local:DownloadsPage}" Route="MainPage" />
+    </FlyoutItem>
+    <FlyoutItem Title="Settings">
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource />
+        </FlyoutItem.FlyoutIcon>
+        <ShellContent Title="Settings" ContentTemplate="{DataTemplate local:SettingsPage}" Route="SettingsPage"/>
+    </FlyoutItem>
+</Shell>

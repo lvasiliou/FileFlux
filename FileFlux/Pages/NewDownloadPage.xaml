@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:FileFlux"
+             x:Class="FileFlux.Pages.NewDownloadPage"
+             xmlns:strings="clr-namespace:FileFlux.Localization"
+             xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"             
+             x:DataType="viewmodel:NewDownloadViewModel"
+             xmlns:model="clr-namespace:FileFlux.Model"
+             Title="New Download">
+    <ContentPage.Resources>
+        <local:FileSizeConverter x:Key="FileSizeConverter" />
+    </ContentPage.Resources>
+    <Grid ColumnSpacing="10" RowSpacing="10" Padding="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="48"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <HorizontalStackLayout Grid.Row="0" Spacing="10">
+            <Label Text="Address:"/>
+            <Entry Grid.Column="1" HorizontalOptions="FillAndExpand"/>
+            <Button Text="Get" Command="{Binding GetFileCommand}"/>
+        </HorizontalStackLayout>
+        <Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" Grid.Row="1"/>
+        <Label Text="{Binding FileDownload.ContentType, StringFormat='Type: {0}'}" Grid.Row="2"/>
+        <Label Text="{Binding FileDownload.TotalSize, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" Grid.Row="3" />
+        <HorizontalStackLayout Grid.Row="5" Spacing="10" HorizontalOptions="End">
+            <Button Text="Start"/>
+            <Button Text="Cancel"/>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
