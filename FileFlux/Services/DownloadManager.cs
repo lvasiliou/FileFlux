@@ -4,14 +4,16 @@ using System.Text.Json;
 using FileFlux.Model;
 using FileFlux.Contracts;
 using System;
+using System.Collections.Concurrent;
 
 namespace FileFlux.Services;
+
 public class DownloadManager
 {
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
 
-    public ObservableCollection<FileDownload> Downloads { get; } = new();
+    public ObservableCollection<FileDownload> Downloads = new();
 
     public DownloadManager(DownloadServiceFactory downloadServiceFactory, SettingsService settingsService)
     {
@@ -83,17 +85,16 @@ public class DownloadManager
         }
 
         Downloads.Remove(download);
-        
+
     }
 
     public void ClearDownloads()
     {
-        foreach (var item in Downloads)
+        var itemsToRemove = Downloads.Where(item => item.Status != FileDownloadStatuses.InProgress).ToList();
+
+        foreach (FileDownload fileDownload in itemsToRemove)
         {
-            if (item.Status != FileDownloadStatuses.InProgress)
-            {
-                Downloads.Remove(item);
-            }
+            Downloads.Remove(fileDownload);
         }
     }
 
