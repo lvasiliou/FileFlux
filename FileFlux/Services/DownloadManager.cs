@@ -83,11 +83,7 @@ public class DownloadManager
         }
 
         Downloads.Remove(download);
-
-        if (File.Exists(download.SavePath))
-        {
-            File.Delete(download.SavePath);
-        }
+        
     }
 
     public void ClearDownloads()

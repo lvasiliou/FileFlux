@@ -1,4 +1,6 @@
-﻿using FileFlux.Model;
+﻿using CommunityToolkit.Mvvm.Input;
+
+using FileFlux.Model;
 using FileFlux.Pages;
 using FileFlux.Services;
 
@@ -12,24 +14,16 @@ namespace FileFlux.ViewModel
         public ObservableCollection<FileDownload> Downloads { get; }
 
         private readonly DownloadManager _downloadManager;
-        private FileDownload _selectedItem;
 
         public ICommand NewDownload { get; private set; }
 
         public ICommand ClearDownloads { get; private set; }
 
-        public ICommand CancelDownload { get; private set; }
+        public IAsyncRelayCommand CancelDownload { get; private set; }
 
-        public ICommand ToggleDownloadStatus { get; private set; }
+        public IAsyncRelayCommand ToggleDownloadStatus { get; private set; }
 
-        public FileDownload SelectedItem
-        {
-            get => this._selectedItem;
-            set
-            {
-                this._selectedItem = value;
-            }
-        }
+        public IRelayCommand DeleteCommand { get; private set; }
 
         public DownloadsViewModel(DownloadManager downloadManager)
         {
@@ -37,31 +31,30 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             NewDownload = new Command(NewDownloadAction);
             this.ClearDownloads = new Command(ClearDownloadsAction);
-            this.CancelDownload = new Command(CancelDownloadAction);
-            this.ToggleDownloadStatus = new Command(ToggleDownloadStatusAction);
+            this.CancelDownload = new AsyncRelayCommand<FileDownload>(CancelDownloadAction);
+            this.ToggleDownloadStatus = new AsyncRelayCommand<FileDownload>(ToggleDownloadStatusAction);
+            this.DeleteCommand = new RelayCommand<FileDownload>(DeleteAction);
         }
 
-        private void ToggleDownloadStatusAction(object obj)
+        private void DeleteAction(FileDownload fileDownload)
         {
-            if (this.SelectedItem != null)
+            if (File.Exists(fileDownload.SavePath))
             {
-                if (this.SelectedItem.Status == FileDownloadStatuses.Paused)
-                {
-                    this._downloadManager.StartDownloadAsync(this.SelectedItem).GetAwaiter().GetResult();
-                }
-                else
-                {
-                    this._downloadManager.PauseDownload(this.SelectedItem).GetAwaiter().GetResult();
-                }
+                File.Delete(fileDownload.SavePath);
             }
+
+            this._downloadManager.RemoveDownload(fileDownload);
         }
 
-        private void CancelDownloadAction(object obj)
+        private async Task ToggleDownloadStatusAction(FileDownload fileDownload)
         {
-            if (this.SelectedItem != null)
-            {
-                this._downloadManager.CancelDownload(this.SelectedItem).GetAwaiter().GetResult();
-            }
+            
+        }
+
+        private async Task CancelDownloadAction(FileDownload fileDownload)
+        {
+            await this._downloadManager.CancelDownload(fileDownload);
+            this._downloadManager.RemoveDownload(fileDownload);
         }
 
         private void NewDownloadAction(Object obj)

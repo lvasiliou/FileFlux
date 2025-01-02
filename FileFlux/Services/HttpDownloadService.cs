@@ -23,11 +23,6 @@ namespace FileFlux.Services
 
                 var contentDisposition = response.Content.Headers.ContentDisposition;
 
-                if (contentDisposition != null & contentDisposition?.DispositionType != "attachment")
-                {
-                    throw new InvalidOperationException(App_Resources.DownloadErrorNotAnAttachment);
-                }
-
                 string contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
                 var filename = contentDisposition?.FileName ?? Path.GetFileName(uri.LocalPath);
                 var totalBytes = contentDisposition?.Size ?? response.Content.Headers.ContentLength ?? 0;

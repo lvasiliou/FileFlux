@@ -1,40 +1,65 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:FileFlux"
-             x:Class="FileFlux.Pages.NewDownloadPage"
-             xmlns:strings="clr-namespace:FileFlux.Localization"
-             xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"             
-             x:DataType="viewmodel:NewDownloadViewModel"
-             xmlns:model="clr-namespace:FileFlux.Model"
-             Title="New Download">
-    <ContentPage.Resources>
-        <local:FileSizeConverter x:Key="FileSizeConverter" />
-    </ContentPage.Resources>
-    <Grid ColumnSpacing="10" RowSpacing="10" Padding="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="48"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+			 xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+			 xmlns:local="clr-namespace:FileFlux"
+			 x:Class="FileFlux.Pages.NewDownloadPage"
+			 x:Name="newDownloadPage"
+			 xmlns:strings="clr-namespace:FileFlux.Localization"
+			 xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"
+			 x:DataType="viewmodel:NewDownloadViewModel"
+			 xmlns:model="clr-namespace:FileFlux.Model"
+			 Title="New Download - FileFlux">
+	<ContentPage.Resources>
+		<local:FileSizeConverter x:Key="FileSizeConverter" />
+	</ContentPage.Resources>
+	<Grid ColumnSpacing="10" RowSpacing="10" Padding="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="48"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Label Text="New Download" FontSize="Medium" Grid.Row="0"/>
 
-        <HorizontalStackLayout Grid.Row="0" Spacing="10">
-            <Label Text="Address:"/>
-            <Entry Grid.Column="1" HorizontalOptions="FillAndExpand"/>
-            <Button Text="Get" Command="{Binding GetFileCommand}"/>
-        </HorizontalStackLayout>
-        <Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" Grid.Row="1"/>
-        <Label Text="{Binding FileDownload.ContentType, StringFormat='Type: {0}'}" Grid.Row="2"/>
-        <Label Text="{Binding FileDownload.TotalSize, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" Grid.Row="3" />
-        <HorizontalStackLayout Grid.Row="5" Spacing="10" HorizontalOptions="End">
-            <Button Text="Start"/>
-            <Button Text="Cancel"/>
-        </HorizontalStackLayout>
-    </Grid>
+		<HorizontalStackLayout Grid.Row="1" Spacing="10" VerticalOptions="Center">
+			<Label Text="Address:" VerticalOptions="Center"/>
+			<Entry Grid.Column="1" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="{Binding Url}" MinimumWidthRequest="450" Placeholder="Download Url">
+				<Entry.Behaviors>
+					<toolkit:UriValidationBehavior Flags="ValidateOnValueChanged" UriKind="Absolute" x:Name="uriValidationBehavior" />
+				</Entry.Behaviors>
+			</Entry>
+			<Button Text="Get" Command="{Binding GetFileCommand}" IsEnabled="False">
+				<Button.Triggers>
+					<DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference uriValidationBehavior}, Path=IsValid}" Value="True">
+						<Setter Property="IsEnabled" Value="True"/>
+					</DataTrigger>
+				</Button.Triggers>
+			</Button>
+		</HorizontalStackLayout>
+
+		<Border Grid.Row="2" Stroke="DarkGray" BackgroundColor="Transparent" Padding="10">
+			<VerticalStackLayout Spacing="10">
+				<Label Text="File Details" FontSize="Caption"/>
+				<Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" FontSize="Small"/>
+				<Label Text="{Binding FileDownload.ContentType, StringFormat='Type: {0}'}" FontSize="Micro"/>
+				<Label Text="{Binding FileDownload.TotalSize, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" FontSize="Micro" />
+			</VerticalStackLayout>
+		</Border>
+
+		<HorizontalStackLayout Grid.Row="4" Spacing="10" HorizontalOptions="End">
+			<Button Text="Start" Command="{Binding StartCommand}" IsEnabled="False">
+				<Button.Triggers>
+					<DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference newDownloadPage}, Path=BindingContext.DownloadValid}" Value="True">
+						<Setter Property="IsEnabled" Value="True"/>
+					</DataTrigger>
+				</Button.Triggers>
+			</Button>
+			<Button Text="Cancel" Command="{Binding CancelCommand}"/>
+		</HorizontalStackLayout>
+	</Grid>
 </ContentPage>

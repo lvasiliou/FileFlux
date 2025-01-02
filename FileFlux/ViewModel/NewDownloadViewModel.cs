@@ -13,16 +13,17 @@ namespace FileFlux.ViewModel
     {
         private readonly DownloadManager _downloadManager;
 
-        private FileDownload _fileDownload;
-        private string _url;
+        private FileDownload? _fileDownload = null;
+        private string _url = string.Empty;
 
         public ICommand CancelCommand { get; private set; }
 
-        public ICommand SaveCommand { get; private set; }
+        public IAsyncRelayCommand StartCommand { get; private set; }
 
         public IAsyncRelayCommand GetFileCommand { get; private set; }
 
-        private string Url
+
+        public string Url
         {
             get => this._url;
             set
@@ -32,13 +33,22 @@ namespace FileFlux.ViewModel
             }
         }
 
-        public FileDownload FileDownload
+        public FileDownload? FileDownload
         {
             get => this._fileDownload;
             set
             {
                 this._fileDownload = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FileDownload)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadValid)));
+            }
+        }
+
+        public bool DownloadValid
+        {
+            get
+            {
+                return this.FileDownload != null && this.FileDownload.Status != FileDownloadStatuses.Failed;
             }
         }
 
@@ -49,6 +59,18 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             this.CancelCommand = new Command(CancelAction);
             this.GetFileCommand = new AsyncRelayCommand(GetFileActionAsync);
+            this.StartCommand = new AsyncRelayCommand(StartDownload);
+
+        }
+
+        private async Task StartDownload()
+        {
+            if (this._fileDownload != null)
+            {
+                this._downloadManager.AddDownload(this._fileDownload);
+                _ = this._downloadManager.StartDownloadAsync(this._fileDownload);
+                this.PopModal();
+            }
         }
 
         private async Task GetFileActionAsync()
@@ -63,9 +85,14 @@ namespace FileFlux.ViewModel
 
                 this.FileDownload = task.Result;
             });
-        }        
+        }
 
         private void CancelAction(object obj)
+        {
+            this.PopModal();
+        }
+
+        private void PopModal()
         {
             var window = App.Current?.Windows[0] as Window;
             window.Page.Navigation.PopModalAsync();
