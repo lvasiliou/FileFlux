@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Window xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"        
-        x:Class="FileFlux.MainWindow"
-        Width="800"
-        Height="450"
-        MinimumHeight="450"
-        MinimumWidth="800"        
-        Title="FileFlux">
-    <Window.TitleBar>
-        <TitleBar Title="FileFlux" HeightRequest="48" Subtitle="Download Manager" Icon="fileflux.png">
-            <TitleBar.TrailingContent>
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="6">                    
-                    <ImageButton BackgroundColor="Transparent" BorderWidth="0" Grid.Column="2" x:Name="openSettingsButton">
-                        <ImageButton.Source>
-                            <FontImageSource FontFamily="FAS" Glyph="&#xf013;" Size="18" />
-                        </ImageButton.Source>
-                    </ImageButton>
-                </HorizontalStackLayout>
-            </TitleBar.TrailingContent>
-        </TitleBar>
-    </Window.TitleBar>
+		xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"        
+		x:Class="FileFlux.MainWindow"
+		Width="800"
+		Height="450"
+		MinimumHeight="450"
+		MinimumWidth="800"
+		Title="FileFlux">
+	<Window.TitleBar>
+		<TitleBar Title="FileFlux" HeightRequest="48" Subtitle="Download Manager" Icon="fileflux.png">
+			<TitleBar.TrailingContent>
+				<HorizontalStackLayout HorizontalOptions="End" Spacing="6">					
+					<ImageButton BackgroundColor="Transparent" BorderWidth="0" x:Name="newDownloadButton">
+						<ImageButton.Source>
+							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf019;"/>
+						</ImageButton.Source>
+					</ImageButton>
+					<ImageButton BackgroundColor="Transparent" BorderWidth="0" x:Name="clearDownloadsButton">
+						<ImageButton.Source>
+							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf51a;" />
+						</ImageButton.Source>
+					</ImageButton>
+					<BoxView VerticalOptions="FillAndExpand" Margin="0,14" Color="DarkGray" WidthRequest="1" MaximumWidthRequest="1" />
+					<ImageButton BackgroundColor="Transparent" BorderWidth="0" Grid.Column="2" x:Name="openSettingsButton">
+						<ImageButton.Source>
+							<FontImageSource FontFamily="FAS" Glyph="&#xf013;" Size="18" />
+						</ImageButton.Source>
+					</ImageButton>
+				</HorizontalStackLayout>
+			</TitleBar.TrailingContent>
+		</TitleBar>
+	</Window.TitleBar>
 </Window>

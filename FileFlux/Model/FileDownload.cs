@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace FileFlux.Model;
 public class FileDownload : INotifyPropertyChanged
@@ -18,6 +19,7 @@ public class FileDownload : INotifyPropertyChanged
     private long _totalSize;
     private DateTime _lastModified;
     private DateTime _created;
+    private long _totalDownloaded;
 
     public Guid Id
     {
@@ -55,12 +57,6 @@ public class FileDownload : INotifyPropertyChanged
         set => SetProperty(ref _status, value);
     }
 
-    public byte[]? Content
-    {
-        get => _content;
-        set => SetProperty(ref _content, value);
-    }
-
     public string? ContentType
     {
         get => _contentType;
@@ -84,12 +80,19 @@ public class FileDownload : INotifyPropertyChanged
         set => SetProperty(ref _created, value);
     }
 
+    public long TotalDownloaded
+    {
+        get => _totalDownloaded;
+        set => SetProperty(ref _totalDownloaded, value);
+    }
+
     public string? ErrorMessage
     {
         get => _errorMessage;
         set => SetProperty(ref _errorMessage, value);
     }
 
+    [JsonIgnore]
     public CancellationTokenSource CancellationTokenSource
     {
         get => _cancellationTokenSource;

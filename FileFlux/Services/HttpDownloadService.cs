@@ -61,6 +61,7 @@ namespace FileFlux.Services
                     await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
                     totalRead += bytesRead;
 
+                    fileDownload.TotalDownloaded = totalRead;
                     fileDownload.PercentCompleted = (double)totalRead / fileDownload.TotalSize * 100;
                     if (fileDownload.CancellationTokenSource.IsCancellationRequested)
                     {

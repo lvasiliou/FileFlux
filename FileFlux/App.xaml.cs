@@ -1,7 +1,8 @@
-﻿using FileFlux.Services;
-using FileFlux.ViewModel;
+﻿using FileFlux.ViewModel;
+
 #if WINDOWS10_0_17763_0_OR_GREATER
-using FileFlux.Platforms.Windows;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml.Media;
 #endif
 
 namespace FileFlux
@@ -26,15 +27,14 @@ namespace FileFlux
             if (downloadsViewModel != null)
             {
 #if WINDOWS10_0_17763_0_OR_GREATER
-                MainWindow mainWindow = new MainWindow(new DownloadsPage(downloadsViewModel));               
+                MainWindow mainWindow = new MainWindow(new DownloadsPage(downloadsViewModel));
+                wnd = mainWindow;
 
                 var nativeWindow = mainWindow.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
-
                 if (nativeWindow != null)
                 {
-                    nativeWindow.TryMicaOrAcrylic();
+                    nativeWindow.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
                 }
-                wnd = mainWindow;
 #else                
                 wnd = new Window(new NavigationPage(new DownloadsPage(downloadsViewModel)));
 #endif

@@ -3,9 +3,11 @@ using CommunityToolkit.Maui;
 using FileFlux.ViewModel;
 using FileFlux.Services;
 using Microsoft.Maui.LifecycleEvents;
+
+
 #if WINDOWS10_0_17763_0_OR_GREATER
-using FileFlux.WinUI;
-using FileFlux.Platforms.Windows;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml.Media;
 #endif
 
 namespace FileFlux
@@ -45,7 +47,7 @@ namespace FileFlux
             {
                 wndLifeCycleBuilder.OnWindowCreated(window =>
                 {
-                    window.TryMicaOrAcrylic();
+                    window.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
                 });
             });
 #endif

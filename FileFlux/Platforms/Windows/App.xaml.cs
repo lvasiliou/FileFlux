@@ -6,8 +6,6 @@ using Microsoft.Windows.AppLifecycle;
 
 using System.Diagnostics;
 
-using Windows.ApplicationModel.Activation;
-
 namespace FileFlux.WinUI
 {
     /// <summary>

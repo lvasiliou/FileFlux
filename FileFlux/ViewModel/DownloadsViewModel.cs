@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 
 using FileFlux.Model;
-using FileFlux.Pages;
 using FileFlux.Services;
+using FileFlux.Utilities;
 
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -48,7 +48,6 @@ namespace FileFlux.ViewModel
 
         private async Task ToggleDownloadStatusAction(FileDownload fileDownload)
         {
-            
         }
 
         private async Task CancelDownloadAction(FileDownload fileDownload)
@@ -59,26 +58,7 @@ namespace FileFlux.ViewModel
 
         private void NewDownloadAction(Object obj)
         {
-            string url = string.Empty;
-            var window = App.Current?.Windows[0] as Window;
-            var newDownloadm = new NewDownloadViewModel(this._downloadManager);
-            if (window != null)
-            {
-                window.Page.Navigation.PushModalAsync(new NewDownloadPage(newDownloadm)).ContinueWith(x =>
-                {
-                    FileDownload fileDownload = newDownloadm.FileDownload;                    
-
-                    if (fileDownload != null)
-                    {
-                        MainThread.InvokeOnMainThreadAsync(() =>
-                        {
-                            this._downloadManager.AddDownload(fileDownload);
-                            _ = this._downloadManager.StartDownloadAsync(fileDownload);
-                        });
-                    }
-
-                });
-            }
+            Utility.OpenNewDownloadWindow();
         }
 
         private void ClearDownloadsAction(Object obj)
