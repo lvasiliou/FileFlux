@@ -66,37 +66,20 @@ namespace FileFlux.ViewModel
             {
                 window.Page.Navigation.PushModalAsync(new NewDownloadPage(newDownloadm)).ContinueWith(x =>
                 {
-                    FileDownload fileDownload = x.IsCompleted ? newDownloadm.FileDownload : null;
+                    FileDownload fileDownload = newDownloadm.FileDownload;                    
 
                     if (fileDownload != null)
                     {
                         MainThread.InvokeOnMainThreadAsync(() =>
                         {
                             this._downloadManager.AddDownload(fileDownload);
-                            this._downloadManager.StartDownloadAsync(fileDownload);
+                            _ = this._downloadManager.StartDownloadAsync(fileDownload);
                         });
                     }
 
                 });
             }
         }
-
-        //window.Page.DisplayPromptAsync("New Download", "URL:").ContinueWith(x =>
-        //{
-        //    url = x.IsCompleted ? x.Result : string.Empty;
-        //    if (!string.IsNullOrEmpty(url) && Uri.IsWellFormedUriString(url, UriKind.Absolute))
-        //    {
-        //        this._downloadManager.NewDownload(url).ContinueWith(x =>
-        //        {
-        //            MainThread.InvokeOnMainThreadAsync(() =>
-        //            {
-        //                this._downloadManager.AddDownload(x.Result);
-        //                this._downloadManager.StartDownloadAsync(x.Result);
-        //            });
-        //        });
-        //    }
-        //});
-
 
         private void ClearDownloadsAction(Object obj)
         {

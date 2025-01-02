@@ -13,6 +13,7 @@
 	<ContentPage.Resources>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 	</ContentPage.Resources>
+
 	<Grid ColumnSpacing="10" RowSpacing="10" Padding="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -28,7 +29,7 @@
 
 		<HorizontalStackLayout Grid.Row="1" Spacing="10" VerticalOptions="Center">
 			<Label Text="Address:" VerticalOptions="Center"/>
-			<Entry Grid.Column="1" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="{Binding Url}" MinimumWidthRequest="450" Placeholder="Download Url">
+			<Entry Grid.Column="1" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="{Binding Url}" MinimumWidthRequest="450" Placeholder="Download Url" MaximumWidthRequest="500">
 				<Entry.Behaviors>
 					<toolkit:UriValidationBehavior Flags="ValidateOnValueChanged" UriKind="Absolute" x:Name="uriValidationBehavior" />
 				</Entry.Behaviors>
