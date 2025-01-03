@@ -6,5 +6,6 @@ public enum FileDownloadStatuses
     Completed,
     Cancelled,
     Paused,
-    Failed
+    Failed,
+    Verifying
 }

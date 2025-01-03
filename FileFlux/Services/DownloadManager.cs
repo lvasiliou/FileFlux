@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
 
+using FileFlux.Utilities;
+
 using FileFlux.Model;
+using System.Security.Cryptography;
 
 
 namespace FileFlux.Services;
 
-public class DownloadManager : IDisposable
+public partial class DownloadManager : IDisposable
 {
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
@@ -94,6 +97,30 @@ public class DownloadManager : IDisposable
 
     }
 
+    public async Task<bool> VerifyDownload(FileDownload fileDownload, string hash)
+    {
+        bool verified = false;
+
+        if (!string.IsNullOrWhiteSpace(fileDownload.ETag))
+        {
+            fileDownload.Status = FileDownloadStatuses.Verifying;
+            using (var algo = MD5.Create())
+            {
+                using (var fs = new FileStream(fileDownload.SavePath, FileMode.Open))
+                {
+                    fs.Position = 0;
+                    byte[] bytes = await algo.ComputeHashAsync(fs);
+                    string computeHash = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLowerInvariant();
+                    string normalisedHash = hash.Replace("0x", string.Empty).ToLowerInvariant();
+                    bool comparison = string.Compare(computeHash, normalisedHash, StringComparison.OrdinalIgnoreCase) == 0;
+                    verified = comparison;
+                }
+            }
+        }
+
+        return verified;
+    }
+
     public void ClearDownloads()
     {
         var itemsToRemove = Downloads.Where(item => item.Status != FileDownloadStatuses.InProgress).ToList();
@@ -108,20 +135,19 @@ public class DownloadManager : IDisposable
     {
         var json = JsonSerializer.Serialize(Downloads);
         var localAppDataPath = GetLocalAppDataPath();
-        var filePath = Path.Combine(localAppDataPath, "downloads.json");
-        var directoryName = Path.GetDirectoryName(filePath);
-        if (!Directory.Exists(directoryName))
+        var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
+        var directoryName = Path.GetDirectoryName(filePath) ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(directoryName) & !Directory.Exists(directoryName))
         {
             Directory.CreateDirectory(directoryName);
+            File.WriteAllText(filePath, json);
         }
-
-        File.WriteAllText(filePath, json);
     }
 
     public void LoadFromDisk()
     {
         var localAppDataPath = GetLocalAppDataPath();
-        var filePath = Path.Combine(localAppDataPath, "downloads.json");
+        var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
         if (File.Exists(filePath))
         {
             var json = File.ReadAllText(filePath);
@@ -135,7 +161,7 @@ public class DownloadManager : IDisposable
 
                     if (download.Status == FileDownloadStatuses.InProgress)
                     {
-                        //restart download
+                        //todo: restart download
                     }
                 }
             }
@@ -144,7 +170,12 @@ public class DownloadManager : IDisposable
 
     public static string EnsureUniqueFileName(string fullPath)
     {
-        string directory = Path.GetDirectoryName(fullPath);
+        if (string.IsNullOrWhiteSpace(fullPath))
+        {
+            throw new ArgumentException("Save Path cannot be null or whitespace.", nameof(fullPath));
+        }
+
+        string directory = Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException("Directory name cannot be determined.");
         string filename = Path.GetFileNameWithoutExtension(fullPath);
         string extension = Path.GetExtension(fullPath);
         string newFullPath = fullPath;

@@ -4,7 +4,7 @@ namespace FileFlux
 {
     internal class FileSizeConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is long sizeInBytes)
             {

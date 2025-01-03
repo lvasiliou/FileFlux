@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace FileFlux.ViewModel
 {
-    public class NewDownloadViewModel : INotifyPropertyChanged
+    public partial class NewDownloadViewModel : INotifyPropertyChanged
     {
         private readonly DownloadManager _downloadManager;
 
@@ -57,10 +57,15 @@ namespace FileFlux.ViewModel
         public NewDownloadViewModel(DownloadManager downloadManager)
         {
             this._downloadManager = downloadManager;
-            this.CancelCommand = new Command(CancelAction);
+            this.CancelCommand = new RelayCommand(CancelAction);
             this.GetFileCommand = new AsyncRelayCommand(GetFileActionAsync);
             this.StartCommand = new AsyncRelayCommand(StartDownload);
 
+        }
+
+        private void CancelAction()
+        {
+            this.PopModal();
         }
 
         private async Task StartDownload()
@@ -85,11 +90,6 @@ namespace FileFlux.ViewModel
 
                 this.FileDownload = task.Result;
             });
-        }
-
-        private void CancelAction(object obj)
-        {
-            this.PopModal();
         }
 
         private void PopModal()

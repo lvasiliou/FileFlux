@@ -49,6 +49,13 @@
 				<Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" FontSize="Small"/>
 				<Label Text="{Binding FileDownload.ContentType, StringFormat='Type: {0}'}" FontSize="Micro"/>
 				<Label Text="{Binding FileDownload.TotalSize, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" FontSize="Micro" />
+				<Label Text="{Binding FileDownload.SupportsResume, StringFormat='Supports Resume: {0}'}" FontSize="Micro">
+					<Label.Triggers>
+						<DataTrigger TargetType="Label" Binding="{Binding FileDownload.SupportsResume}" Value="False">
+							<Setter Property="TextColor" Value="Orange"/>
+						</DataTrigger>
+					</Label.Triggers>
+				</Label>
 			</VerticalStackLayout>
 		</Border>
 

@@ -17,6 +17,7 @@
 			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" x:Key="ResumeGlyph" />
 		</ResourceDictionary>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
+		<local:StatusConverter x:Key="StatusConverter" />
 	</ContentPage.Resources>
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Command="{Binding NewDownload}">
@@ -64,7 +65,7 @@
 							</Image>
 							<VerticalStackLayout Grid.Column="1" HorizontalOptions="Start">
 								<Label Text="{Binding FileName}" FontSize="Small" />
-								<Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="Micro">
+								<Label Text="{Binding Status, Converter={StaticResource StatusConverter}, StringFormat='Status: {0}'}" FontSize="Micro">
 									<Label.Triggers>
 										<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
 											<Setter Property="TextColor" Value="Red"/>

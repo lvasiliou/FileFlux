@@ -25,7 +25,7 @@ namespace FileFlux
             if (downloadsViewModel != null)
             {
 #if WINDOWS10_0_17763_0_OR_GREATER
-                MainWindow mainWindow = new MainWindow(new DownloadsPage(downloadsViewModel));
+                var mainWindow = new MainWindow(new DownloadsPage(downloadsViewModel));
                 wnd = mainWindow;
 
                 var nativeWindow = mainWindow.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
