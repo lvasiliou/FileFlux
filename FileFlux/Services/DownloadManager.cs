@@ -1,14 +1,12 @@
-﻿using FileFlux.Localization;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+
 using FileFlux.Model;
-using FileFlux.Contracts;
-using System;
-using System.Collections.Concurrent;
+
 
 namespace FileFlux.Services;
 
-public class DownloadManager
+public class DownloadManager : IDisposable
 {
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
@@ -19,6 +17,7 @@ public class DownloadManager
     {
         _settingsService = settingsService;
         this._downloadServiceFactory = downloadServiceFactory;
+        this.LoadFromDisk();
     }
 
     public async Task<FileDownload> NewDownload(string url)
@@ -26,8 +25,8 @@ public class DownloadManager
         try
         {
             var uri = new Uri(url);
-            IDownloadService service = this._downloadServiceFactory.GetService(uri);
-            FileDownload fileDownload = await service.GetMetadata(uri);
+            var _downloadService = this._downloadServiceFactory.GetService(uri);
+            FileDownload fileDownload = await _downloadService.GetMetadata(uri);
 
             var filename = fileDownload.FileName;
             var savePathHint = Path.Combine(_settingsService.GetSaveLocation(), filename);
@@ -51,9 +50,8 @@ public class DownloadManager
     {
         try
         {
-            IDownloadService service = this._downloadServiceFactory.GetService(fileDownload.Url);
-
-            await service.StartDownloadAsync(fileDownload);
+            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+            await _downloadService.StartDownloadAsync(fileDownload);
         }
         catch (Exception ex)
         {
@@ -64,13 +62,21 @@ public class DownloadManager
 
     public async Task PauseDownload(FileDownload fileDownload)
     {
-        await fileDownload.CancellationTokenSource.CancelAsync();
-        fileDownload.Status = FileDownloadStatuses.Paused;
+        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+        await _downloadService.PauseDownload(fileDownload);
     }
 
     public async Task CancelDownload(FileDownload fileDownload)
     {
-        await fileDownload.CancellationTokenSource.CancelAsync();
+        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+        await _downloadService.CancelDownload(fileDownload);
+    }
+
+    public async Task ResumeDownload(FileDownload fileDownload)
+    {
+        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+        fileDownload.CancellationTokenSource = new();
+        await _downloadService.StartDownloadAsync(fileDownload);
     }
     public void AddDownload(FileDownload download)
     {
@@ -98,14 +104,24 @@ public class DownloadManager
         }
     }
 
-    public void SaveToDisk(string filePath)
+    public void SaveToDisk()
     {
         var json = JsonSerializer.Serialize(Downloads);
+        var localAppDataPath = GetLocalAppDataPath();
+        var filePath = Path.Combine(localAppDataPath, "downloads.json");
+        var directoryName = Path.GetDirectoryName(filePath);
+        if (!Directory.Exists(directoryName))
+        {
+            Directory.CreateDirectory(directoryName);
+        }
+
         File.WriteAllText(filePath, json);
     }
 
-    public void LoadFromDisk(string filePath)
+    public void LoadFromDisk()
     {
+        var localAppDataPath = GetLocalAppDataPath();
+        var filePath = Path.Combine(localAppDataPath, "downloads.json");
         if (File.Exists(filePath))
         {
             var json = File.ReadAllText(filePath);
@@ -116,10 +132,16 @@ public class DownloadManager
                 foreach (var download in downloads)
                 {
                     Downloads.Add(download);
+
+                    if (download.Status == FileDownloadStatuses.InProgress)
+                    {
+                        //restart download
+                    }
                 }
             }
         }
     }
+
     public static string EnsureUniqueFileName(string fullPath)
     {
         string directory = Path.GetDirectoryName(fullPath);
@@ -136,5 +158,35 @@ public class DownloadManager
         }
 
         return newFullPath;
+    }
+
+    public static string GetLocalAppDataPath()
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FileFlux");
+    }
+
+    public void Dispose()
+    {
+        var downloadsToPause = new Collection<FileDownload>();
+
+        foreach (FileDownload download in Downloads)
+        {
+
+            if (download.Status == FileDownloadStatuses.InProgress)
+            {
+                downloadsToPause.Add(download);
+            }
+        }
+
+        foreach (FileDownload downloadToPause in downloadsToPause)
+        {
+            this.PauseDownload(downloadToPause).ContinueWith((task) =>
+            {
+                task.Wait();
+            });
+        }
+
+        this.SaveToDisk();
+
     }
 }

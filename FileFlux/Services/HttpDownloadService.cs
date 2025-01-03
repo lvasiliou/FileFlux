@@ -1,11 +1,16 @@
 ﻿using FileFlux.Contracts;
-using FileFlux.Localization;
 using FileFlux.Model;
+
+using System.Net.Http.Headers;
 
 namespace FileFlux.Services
 {
     public class HttpDownloadService : IDownloadService
     {
+        private const string AcceptRangesHeader = "Accept-Ranges";
+
+        private const string BytesRangeHeader = "bytes";
+
         private readonly HttpClient _httpClient;
         public HttpDownloadService(HttpClient httpClient)
         {
@@ -17,12 +22,14 @@ namespace FileFlux.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+                var request = new HttpRequestMessage(HttpMethod.Head, uri);
+                var response = await _httpClient.SendAsync(request);
 
                 response.EnsureSuccessStatusCode();
 
                 var contentDisposition = response.Content.Headers.ContentDisposition;
 
+                bool supportsResume = response.Headers.Contains(AcceptRangesHeader) && String.Compare(response.Headers.GetValues(AcceptRangesHeader)?.ToString(), BytesRangeHeader, StringComparison.OrdinalIgnoreCase) == 0;
                 string contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
                 var filename = contentDisposition?.FileName ?? Path.GetFileName(uri.LocalPath);
                 var totalBytes = contentDisposition?.Size ?? response.Content.Headers.ContentLength ?? 0;
@@ -41,15 +48,38 @@ namespace FileFlux.Services
         {
             try
             {
+                var request = new HttpRequestMessage(HttpMethod.Get, fileDownload.Url);
+                FileMode fileMode = FileMode.CreateNew;
+
+                switch (fileDownload.Status)
+                {
+                    case FileDownloadStatuses.New:
+                        fileMode = FileMode.CreateNew;
+                        break;
+                    case FileDownloadStatuses.Paused:
+                        if (fileDownload.SupportsResume)
+                        {
+                            fileMode = FileMode.Append;
+                            request.Headers.Range = new RangeHeaderValue(fileDownload.TotalDownloaded, fileDownload.TotalSize);
+                        }
+                        else
+                        {
+                            fileMode = FileMode.Truncate;
+                        }
+
+                        break;
+                }
+
                 fileDownload.Status = FileDownloadStatuses.InProgress;
-                var response = await _httpClient.GetAsync(fileDownload.Url, HttpCompletionOption.ResponseHeadersRead, fileDownload.CancellationTokenSource.Token);
+
+
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, fileDownload.CancellationTokenSource.Token);
 
                 response.EnsureSuccessStatusCode();
 
-
                 using var contentStream = await response.Content.ReadAsStreamAsync();
-                var fileMode = File.Exists(fileDownload.SavePath) ? FileMode.Truncate : FileMode.Create;
-                using var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.ReadWrite, FileShare.None);
+
+                using var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.ReadWrite, FileShare.None);                
 
 
                 var buffer = new byte[8192];
@@ -58,6 +88,7 @@ namespace FileFlux.Services
 
                 while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
                 {
+
                     await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
                     totalRead += bytesRead;
 
@@ -66,8 +97,15 @@ namespace FileFlux.Services
                     if (fileDownload.CancellationTokenSource.IsCancellationRequested)
                     {
                         fileStream.Close();
-                        File.Delete(fileDownload.SavePath);
-                        throw new TaskCanceledException(App_Resources.CancellationExceptionMessage);
+                        switch (fileDownload.Status)
+                        {
+                            case FileDownloadStatuses.Paused:
+                                return;
+                            case FileDownloadStatuses.Cancelled:
+                                File.Delete(fileDownload.SavePath);
+                                break;
+                        }
+
                     }
                 }
 
@@ -84,12 +122,17 @@ namespace FileFlux.Services
             }
         }
 
-        public void PauseDownload(FileDownload fileDownload)
+        public async Task PauseDownload(FileDownload fileDownload)
         {
-            fileDownload.CancellationTokenSource.Cancel();
             fileDownload.Status = FileDownloadStatuses.Paused;
+            await fileDownload.CancellationTokenSource.CancelAsync();
         }
 
+        public async Task CancelDownload(FileDownload fileDownload)
+        {
+            await fileDownload.CancellationTokenSource.CancelAsync();
+            fileDownload.Status = FileDownloadStatuses.Cancelled;
+        }
         private static string BuildUserAgent()
         {
             string userAgent = $"FileFlux/{AppInfo.Version} ({DeviceInfo.Manufacturer}; {DeviceInfo.Model}; {DeviceInfo.Platform} {DeviceInfo.VersionString})";

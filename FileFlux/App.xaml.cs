@@ -1,4 +1,5 @@
-﻿using FileFlux.ViewModel;
+﻿using FileFlux.Services;
+using FileFlux.ViewModel;
 
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -20,9 +21,6 @@ namespace FileFlux
         protected override Window CreateWindow(IActivationState? activationState)
         {
             Window wnd = null;
-
-
-
             var downloadsViewModel = _serviceProvider.GetService<DownloadsViewModel>();
             if (downloadsViewModel != null)
             {
@@ -38,8 +36,13 @@ namespace FileFlux
 #else                
                 wnd = new Window(new NavigationPage(new DownloadsPage(downloadsViewModel)));
 #endif
-
             }
+
+            wnd.Destroying += (s, e) =>
+            {
+                var downloadManager = _serviceProvider.GetService<DownloadManager>();
+                downloadManager?.Dispose();
+            };
 
             return wnd;
         }

@@ -12,6 +12,10 @@
 			 BackgroundColor="Transparent"
 			 Title="Downloads - FileFlux">
 	<ContentPage.Resources>
+		<ResourceDictionary>
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" x:Key="PauseGlyph" />
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" x:Key="ResumeGlyph" />
+		</ResourceDictionary>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 	</ContentPage.Resources>
 	<ContentPage.ToolbarItems>
@@ -79,18 +83,31 @@
 										<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.InProgress}">
 											<Setter Property="IsVisible" Value="Visible"/>
 										</DataTrigger>
+										<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Paused}">
+											<Setter Property="IsVisible" Value="Visible"/>
+										</DataTrigger>
+										<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
+											<Setter Property="IsVisible" Value="Visible"/>
+										</DataTrigger>
 									</ImageButton.Triggers>
 									<ImageButton.Source>
 										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="Red"/>
 									</ImageButton.Source>
 								</ImageButton>
-								<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.ToggleDownloadStatus}" CommandParameter="{Binding .}" ToolTipProperties.Text="Pause Download" IsVisible="Collapse">
-									<ImageButton.Source>
-										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" />
-									</ImageButton.Source>
+								<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.ToggleDownloadStatus}" CommandParameter="{Binding .}" IsVisible="Collapse">
 									<ImageButton.Triggers>
 										<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.InProgress}" TargetType="ImageButton">
 											<Setter Property="IsVisible" Value="Visible"/>
+											<Setter Property="ToolTipProperties.Text" Value="Pause Download"/>
+											<Setter Property="Source" Value="{StaticResource Key='PauseGlyph' }"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Paused}" TargetType="ImageButton">
+											<Setter Property="IsVisible" Value="Visible"/>
+											<Setter Property="ToolTipProperties.Text" Value="Resume Download"/>
+											<Setter Property="Source" Value="{StaticResource Key='ResumeGlyph' }"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding SupportsResume}" Value="False" TargetType="ImageButton">
+											<Setter Property="IsVisible" Value="Collapse" />
 										</DataTrigger>
 									</ImageButton.Triggers>
 								</ImageButton>

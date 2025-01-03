@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace FileFlux.Model;
 public class FileDownload : INotifyPropertyChanged
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     private Guid _id;
     private Uri _url;
@@ -20,6 +20,7 @@ public class FileDownload : INotifyPropertyChanged
     private DateTime _lastModified;
     private DateTime _created;
     private long _totalDownloaded;
+    private bool _supportsResume;
 
     public Guid Id
     {
@@ -92,10 +93,17 @@ public class FileDownload : INotifyPropertyChanged
         set => SetProperty(ref _errorMessage, value);
     }
 
+    public bool SupportsResume
+    {
+        get => _supportsResume;
+        set => SetProperty(ref _supportsResume, value);
+    }
+
     [JsonIgnore]
     public CancellationTokenSource CancellationTokenSource
     {
         get => _cancellationTokenSource;
+        set => this._cancellationTokenSource = value;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

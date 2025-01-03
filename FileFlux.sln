@@ -5,7 +5,9 @@ VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileFlux", "FileFlux\FileFlux.csproj", "{835035DE-6913-4874-800D-7D681446BFCA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{63B64385-3257-4F7A-BE80-47FE3C53AA54}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Browser Extensions", "Browser Extensions", "{D4DA098A-2316-475B-B3E3-36B45A66F41C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FireFox", "FireFox", "{B37801F3-B115-43C4-B77D-75113623DCC0}"
 	ProjectSection(SolutionItems) = preProject
 		Browser Extensions\FireFox\background.js = Browser Extensions\FireFox\background.js
 		Browser Extensions\FireFox\manifest.json = Browser Extensions\FireFox\manifest.json
@@ -24,5 +26,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B37801F3-B115-43C4-B77D-75113623DCC0} = {D4DA098A-2316-475B-B3E3-36B45A66F41C}
 	EndGlobalSection
 EndGlobal

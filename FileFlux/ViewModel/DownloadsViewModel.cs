@@ -48,6 +48,15 @@ namespace FileFlux.ViewModel
 
         private async Task ToggleDownloadStatusAction(FileDownload fileDownload)
         {
+            switch (fileDownload.Status)
+            {
+                case FileDownloadStatuses.InProgress:
+                    await this._downloadManager.PauseDownload(fileDownload);
+                    break;
+                case FileDownloadStatuses.Paused:
+                    await this._downloadManager.ResumeDownload(fileDownload);
+                    break;
+            }
         }
 
         private async Task CancelDownloadAction(FileDownload fileDownload)

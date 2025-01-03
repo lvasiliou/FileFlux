@@ -8,6 +8,8 @@ namespace FileFlux.Contracts
 
         public Task StartDownloadAsync(FileDownload fileDownload);
 
-        public void PauseDownload(FileDownload fileDownload);
+        public Task PauseDownload(FileDownload fileDownload);
+        
+        public Task CancelDownload(FileDownload fileDownload);
     }
 }
