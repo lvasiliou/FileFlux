@@ -38,12 +38,16 @@ namespace FileFlux.ViewModel
 
         private void DeleteAction(FileDownload fileDownload)
         {
-            if (File.Exists(fileDownload.SavePath))
+            try
             {
-                File.Delete(fileDownload.SavePath);
-            }
+                this._downloadManager.RemoveDownload(fileDownload);
 
-            this._downloadManager.RemoveDownload(fileDownload);
+                if (File.Exists(fileDownload.SavePath))
+                {
+                    File.Delete(fileDownload.SavePath);
+                }
+            }
+            catch { }
         }
 
         private async Task ToggleDownloadStatusAction(FileDownload fileDownload)

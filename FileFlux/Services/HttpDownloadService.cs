@@ -29,13 +29,15 @@ namespace FileFlux.Services
 
                 var contentDisposition = response.Content.Headers.ContentDisposition;
 
-                bool supportsResume = response.Headers.Contains(AcceptRangesHeader) && String.Compare(response.Headers.GetValues(AcceptRangesHeader)?.ToString(), BytesRangeHeader, StringComparison.OrdinalIgnoreCase) == 0;
+
+                bool supportsResume = response.Headers.AcceptRanges != null && response.Headers.AcceptRanges.Contains(BytesRangeHeader);
+                string etag = response.Headers.ETag?.Tag ?? string.Empty;
                 string contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
                 var filename = contentDisposition?.FileName ?? Path.GetFileName(uri.LocalPath);
                 var totalBytes = contentDisposition?.Size ?? response.Content.Headers.ContentLength ?? 0;
                 var lastModified = contentDisposition?.ModificationDate?.UtcDateTime ?? response.Content.Headers.LastModified?.UtcDateTime ?? DateTime.UtcNow;
                 var created = contentDisposition?.CreationDate?.UtcDateTime ?? DateTime.UtcNow;
-                var fileDownload = new FileDownload { Id = Guid.CreateVersion7(), ContentType = contentType, Url = uri, FileName = filename, TotalSize = totalBytes, Status = FileDownloadStatuses.New, LastModified = lastModified, Created = created };
+                var fileDownload = new FileDownload { Id = Guid.CreateVersion7(), ContentType = contentType, Url = uri, FileName = filename, TotalSize = totalBytes, Status = FileDownloadStatuses.New, LastModified = lastModified, Created = created, SupportsResume = supportsResume, ETag = etag };
                 return fileDownload;
             }
             catch (Exception ex)
@@ -50,6 +52,7 @@ namespace FileFlux.Services
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, fileDownload.Url);
                 FileMode fileMode = FileMode.CreateNew;
+                long totalRead = 0;
 
                 switch (fileDownload.Status)
                 {
@@ -60,7 +63,8 @@ namespace FileFlux.Services
                         if (fileDownload.SupportsResume)
                         {
                             fileMode = FileMode.Append;
-                            request.Headers.Range = new RangeHeaderValue(fileDownload.TotalDownloaded, fileDownload.TotalSize);
+                            request.Headers.Range = new RangeHeaderValue(fileDownload.TotalDownloaded, null);
+                            totalRead = fileDownload.TotalDownloaded;
                         }
                         else
                         {
@@ -79,11 +83,11 @@ namespace FileFlux.Services
 
                 using var contentStream = await response.Content.ReadAsStreamAsync();
 
-                using var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.ReadWrite, FileShare.None);                
+                using var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.Write, FileShare.None);
 
 
                 var buffer = new byte[8192];
-                long totalRead = 0;
+                
                 int bytesRead;
 
                 while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)

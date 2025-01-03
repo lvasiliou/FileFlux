@@ -21,6 +21,7 @@ public class FileDownload : INotifyPropertyChanged
     private DateTime _created;
     private long _totalDownloaded;
     private bool _supportsResume;
+    private string _eTag;
 
     public Guid Id
     {
@@ -97,6 +98,12 @@ public class FileDownload : INotifyPropertyChanged
     {
         get => _supportsResume;
         set => SetProperty(ref _supportsResume, value);
+    }
+
+    public string ETag
+    {
+        get => _eTag;
+        set => SetProperty(ref _eTag, value);
     }
 
     [JsonIgnore]

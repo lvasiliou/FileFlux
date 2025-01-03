@@ -106,8 +106,8 @@
 											<Setter Property="ToolTipProperties.Text" Value="Resume Download"/>
 											<Setter Property="Source" Value="{StaticResource Key='ResumeGlyph' }"/>
 										</DataTrigger>
-										<DataTrigger Binding="{Binding SupportsResume}" Value="False" TargetType="ImageButton">
-											<Setter Property="IsVisible" Value="Collapse" />
+										<DataTrigger Binding="{Binding SupportsResume}" Value="True" TargetType="ImageButton">
+											<Setter Property="IsVisible" Value="Visible" />
 										</DataTrigger>
 									</ImageButton.Triggers>
 								</ImageButton>
