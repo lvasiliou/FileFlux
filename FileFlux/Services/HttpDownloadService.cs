@@ -1,17 +1,14 @@
 ﻿using FileFlux.Contracts;
+using FileFlux.Localization;
 using FileFlux.Model;
+using FileFlux.Utilities;
 
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 
 namespace FileFlux.Services
 {
     public class HttpDownloadService : IDownloadService
     {
-        private const string AcceptRangesHeader = "Accept-Ranges";
-
-        private const string BytesRangeHeader = "bytes";
-
         private readonly HttpClient _httpClient;
         public HttpDownloadService(HttpClient httpClient)
         {
@@ -31,7 +28,7 @@ namespace FileFlux.Services
                 var contentDisposition = response.Content.Headers.ContentDisposition;
 
 
-                bool supportsResume = response.Headers.AcceptRanges != null && response.Headers.AcceptRanges.Contains(BytesRangeHeader);
+                bool supportsResume = response.Headers.AcceptRanges != null && response.Headers.AcceptRanges.Contains(Constants.BytesRangeHeader);
                 string etag = response.Headers.ETag?.Tag ?? string.Empty;
                 string contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
                 var filename = contentDisposition?.FileName ?? Path.GetFileName(uri.LocalPath);
@@ -82,59 +79,60 @@ namespace FileFlux.Services
 
                 response.EnsureSuccessStatusCode();
 
-                if(response.Headers.ETag != null && response.Headers.ETag.Tag != fileDownload.ETag)
+                if (response.Headers.ETag != null && response.Headers.ETag.Tag != fileDownload.ETag)
                 {
                     fileDownload.Status = FileDownloadStatuses.Failed;
-                    fileDownload.ErrorMessage = "The content on the server has changed since the initial download attempt (ETag mismatch).";
+                    fileDownload.ErrorMessage = App_Resources.ETagMismatchMessage;
                     return;
                 }
 
                 using var contentStream = await response.Content.ReadAsStreamAsync();
-
-                using (var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.Write, FileShare.None))
+                if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.SavePath))
                 {
-                    var buffer = new byte[8192];
-
-                    int bytesRead;
-
-                    while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+                    using (var fileStream = new FileStream(fileDownload.SavePath, fileMode, FileAccess.Write, FileShare.None))
                     {
+                        var buffer = new byte[8192];
 
-                        await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
-                        totalRead += bytesRead;
+                        int bytesRead;
 
-                        fileDownload.TotalDownloaded = totalRead;
-                        fileDownload.PercentCompleted = (double)totalRead / fileDownload.TotalSize * 100;
-                        if (fileDownload.CancellationTokenSource.IsCancellationRequested)
+                        while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
                         {
-                            fileStream.Close();
-                            switch (fileDownload.Status)
-                            {
-                                case FileDownloadStatuses.Paused:
-                                    return;
-                                case FileDownloadStatuses.Cancelled:
-                                    File.Delete(fileDownload.SavePath);
-                                    break;
-                            }
 
+                            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                            totalRead += bytesRead;
+
+                            fileDownload.TotalDownloaded = totalRead;
+                            fileDownload.PercentCompleted = (double)totalRead / fileDownload.TotalSize * 100;
+                            if (fileDownload.CancellationTokenSource.IsCancellationRequested)
+                            {
+                                fileStream.Close();
+                                switch (fileDownload.Status)
+                                {
+                                    case FileDownloadStatuses.Paused:
+                                        return;
+                                    case FileDownloadStatuses.Cancelled:
+                                        File.Delete(fileDownload.SavePath);
+                                        break;
+                                }
+
+                            }
                         }
+
                     }
 
+                    fileDownload.Status = FileDownloadStatuses.Completed;
+
+                    File.SetCreationTime(fileDownload.SavePath, fileDownload.Created);
+                    File.SetLastWriteTime(fileDownload.SavePath, fileDownload.LastModified);
+                    File.SetLastAccessTime(fileDownload.SavePath, DateTime.Now);
                 }
-                
-                fileDownload.Status = FileDownloadStatuses.Completed;
-
-                File.SetCreationTime(fileDownload.SavePath, fileDownload.Created);
-                File.SetLastWriteTime(fileDownload.SavePath, fileDownload.LastModified);
-                File.SetLastAccessTime(fileDownload.SavePath, DateTime.Now);
-
             }
             catch (Exception ex)
             {
                 fileDownload.Status = FileDownloadStatuses.Failed;
                 fileDownload.ErrorMessage = ex.Message;
             }
-        }        
+        }
 
         public async Task PauseDownload(FileDownload fileDownload)
         {

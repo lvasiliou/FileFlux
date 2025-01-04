@@ -32,15 +32,18 @@ public partial class DownloadManager : IDisposable
             FileDownload fileDownload = await _downloadService.GetMetadata(uri);
 
             var filename = fileDownload.FileName;
-            var savePathHint = Path.Combine(_settingsService.GetSaveLocation(), filename);
-            if (this._settingsService.GetOverwriteBehaviour() == false)
+            if (!string.IsNullOrWhiteSpace(filename))
             {
-                savePathHint = EnsureUniqueFileName(savePathHint);
+                var savePathHint = Path.Combine(_settingsService.GetSaveLocation(), filename);
+                if (this._settingsService.GetOverwriteBehaviour() == false)
+                {
+                    savePathHint = EnsureUniqueFileName(savePathHint);
+                }
+
+                fileDownload.FileName = Path.GetFileName(savePathHint);
+
+                fileDownload.SavePath = savePathHint;
             }
-
-            fileDownload.FileName = Path.GetFileName(savePathHint);
-
-            fileDownload.SavePath = savePathHint;
             return fileDownload;
         }
         catch (Exception ex)
@@ -49,37 +52,53 @@ public partial class DownloadManager : IDisposable
         }
     }
 
-    public async Task StartDownloadAsync(FileDownload fileDownload)
+    public async Task StartDownloadAsync(FileDownload? fileDownload)
     {
         try
         {
-            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-            await _downloadService.StartDownloadAsync(fileDownload);
+            if (fileDownload != null && fileDownload.Url != null)
+            {
+                var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+                await _downloadService.StartDownloadAsync(fileDownload);
+            }
+
         }
         catch (Exception ex)
         {
-            fileDownload.Status = FileDownloadStatuses.Failed;
-            fileDownload.ErrorMessage = ex.Message;
+            if (fileDownload != null)
+            {
+                fileDownload.Status = FileDownloadStatuses.Failed;
+                fileDownload.ErrorMessage = ex.Message;
+            }
         }
     }
 
-    public async Task PauseDownload(FileDownload fileDownload)
+    public async Task PauseDownload(FileDownload? fileDownload)
     {
-        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-        await _downloadService.PauseDownload(fileDownload);
+        if (fileDownload != null && fileDownload.Url != null)
+        {
+            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+            await _downloadService.PauseDownload(fileDownload);
+        }
     }
 
     public async Task CancelDownload(FileDownload fileDownload)
     {
-        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-        await _downloadService.CancelDownload(fileDownload);
+        if (fileDownload != null && fileDownload.Url != null)
+        {
+            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+            await _downloadService.CancelDownload(fileDownload);
+        }
     }
 
     public async Task ResumeDownload(FileDownload fileDownload)
     {
-        var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-        fileDownload.CancellationTokenSource = new();
-        await _downloadService.StartDownloadAsync(fileDownload);
+        if (fileDownload != null && fileDownload.Url != null)
+        {
+            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+            fileDownload.CancellationTokenSource = new();
+            await _downloadService.StartDownloadAsync(fileDownload);
+        }
     }
     public void AddDownload(FileDownload download)
     {
@@ -101,7 +120,7 @@ public partial class DownloadManager : IDisposable
     {
         bool verified = false;
 
-        if (!string.IsNullOrWhiteSpace(fileDownload.ETag))
+        if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.ETag) && !string.IsNullOrWhiteSpace(fileDownload.SavePath))
         {
             fileDownload.Status = FileDownloadStatuses.Verifying;
             using (var algo = MD5.Create())
@@ -172,10 +191,10 @@ public partial class DownloadManager : IDisposable
     {
         if (string.IsNullOrWhiteSpace(fullPath))
         {
-            throw new ArgumentException("Save Path cannot be null or whitespace.", nameof(fullPath));
+            throw new ArgumentException(Constants.SavePathEmptyException, nameof(fullPath));
         }
 
-        string directory = Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException("Directory name cannot be determined.");
+        string directory = Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException(Constants.DirectoryNotDeterminedException);
         string filename = Path.GetFileNameWithoutExtension(fullPath);
         string extension = Path.GetExtension(fullPath);
         string newFullPath = fullPath;
@@ -193,7 +212,7 @@ public partial class DownloadManager : IDisposable
 
     public static string GetLocalAppDataPath()
     {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FileFlux");
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Constants.AppLocalDataFolder);
     }
 
     public void Dispose()

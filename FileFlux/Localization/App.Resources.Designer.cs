@@ -79,7 +79,16 @@ namespace FileFlux.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Completed.
+        ///   Looks up a localized string similar to Cancelled.
+        /// </summary>
+        internal static string DownloadStatusCancelled {
+            get {
+                return ResourceManager.GetString("DownloadStatusCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Finished.
         /// </summary>
         internal static string DownloadStatusCompleted {
             get {
@@ -97,7 +106,7 @@ namespace FileFlux.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to In Progress.
+        ///   Looks up a localized string similar to Downloading.
         /// </summary>
         internal static string DownloadStatusInProgress {
             get {
@@ -120,6 +129,15 @@ namespace FileFlux.Localization {
         internal static string DownloadStatusPaused {
             get {
                 return ResourceManager.GetString("DownloadStatusPaused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The content on the server has changed since the initial download attempt (ETag mismatch)..
+        /// </summary>
+        internal static string ETagMismatchMessage {
+            get {
+                return ResourceManager.GetString("ETagMismatchMessage", resourceCulture);
             }
         }
         
@@ -147,6 +165,15 @@ namespace FileFlux.Localization {
         internal static string SettingsSaveLocation {
             get {
                 return ResourceManager.GetString("SettingsSaveLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to create window..
+        /// </summary>
+        internal static string WindowFailureException {
+            get {
+                return ResourceManager.GetString("WindowFailureException", resourceCulture);
             }
         }
     }

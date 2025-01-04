@@ -36,37 +36,46 @@ namespace FileFlux.ViewModel
             this.DeleteCommand = new RelayCommand<FileDownload>(DeleteAction);
         }
 
-        private void DeleteAction(FileDownload fileDownload)
+        private void DeleteAction(FileDownload? fileDownload)
         {
-            try
+
+            if (fileDownload != null)
             {
                 this._downloadManager.RemoveDownload(fileDownload);
-
-                if (File.Exists(fileDownload.SavePath))
+                try
                 {
-                    File.Delete(fileDownload.SavePath);
+                    if (File.Exists(fileDownload.SavePath))
+                    {
+                        File.Delete(fileDownload.SavePath);
+                    }
+                }
+                catch { }
+            }
+        }
+
+        private async Task ToggleDownloadStatusAction(FileDownload? fileDownload)
+        {
+            if (fileDownload != null)
+            {
+                switch (fileDownload.Status)
+                {
+                    case FileDownloadStatuses.InProgress:
+                        await this._downloadManager.PauseDownload(fileDownload);
+                        break;
+                    case FileDownloadStatuses.Paused:
+                        await this._downloadManager.ResumeDownload(fileDownload);
+                        break;
                 }
             }
-            catch { }
         }
 
-        private async Task ToggleDownloadStatusAction(FileDownload fileDownload)
+        private async Task CancelDownloadAction(FileDownload? fileDownload)
         {
-            switch (fileDownload.Status)
+            if (fileDownload != null)
             {
-                case FileDownloadStatuses.InProgress:
-                    await this._downloadManager.PauseDownload(fileDownload);
-                    break;
-                case FileDownloadStatuses.Paused:
-                    await this._downloadManager.ResumeDownload(fileDownload);
-                    break;
+                await this._downloadManager.CancelDownload(fileDownload);
+                this._downloadManager.RemoveDownload(fileDownload);
             }
-        }
-
-        private async Task CancelDownloadAction(FileDownload fileDownload)
-        {
-            await this._downloadManager.CancelDownload(fileDownload);
-            this._downloadManager.RemoveDownload(fileDownload);
         }
 
         private void NewDownloadAction(Object obj)

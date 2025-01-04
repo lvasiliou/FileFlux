@@ -1,4 +1,5 @@
-﻿using FileFlux.Model;
+﻿using FileFlux.Localization;
+using FileFlux.Model;
 
 using System.Globalization;
 
@@ -8,29 +9,29 @@ public class StatusConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var textVal = value.ToString();
+        var textVal = value?.ToString() ?? string.Empty;
 
         if (value is FileDownloadStatuses)
         {
             switch (value)
             {
                 case FileDownloadStatuses.InProgress:
-                    textVal = "In Progress";
+                    textVal = App_Resources.DownloadStatusInProgress;
                     break;
                 case FileDownloadStatuses.New:
-                    textVal = "New";
+                    textVal = App_Resources.DownloadStatusNew;
                     break;
                 case FileDownloadStatuses.Cancelled:
-                    textVal = "Cancelled";
+                    textVal = App_Resources.DownloadStatusCancelled;
                     break;
                 case FileDownloadStatuses.Failed:
-                    textVal = "Failed";
+                    textVal = App_Resources.DownloadStatusFailed;
                     break;
                 case FileDownloadStatuses.Completed:
-                    textVal = "Finished";
+                    textVal = App_Resources.DownloadStatusCompleted;
                     break;
                 case FileDownloadStatuses.Paused:
-                    textVal = "Paused";
+                    textVal = App_Resources.DownloadStatusPaused;
                     break;
             }
         }

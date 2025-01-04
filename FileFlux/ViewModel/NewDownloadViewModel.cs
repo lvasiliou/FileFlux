@@ -5,7 +5,6 @@ using FileFlux.Services;
 
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace FileFlux.ViewModel
 {
@@ -16,12 +15,11 @@ namespace FileFlux.ViewModel
         private FileDownload? _fileDownload = null;
         private string _url = string.Empty;
 
-        public ICommand CancelCommand { get; private set; }
+        public IRelayCommand CancelCommand { get; private set; }
 
-        public IAsyncRelayCommand StartCommand { get; private set; }
+        public IRelayCommand StartCommand { get; private set; }
 
         public IAsyncRelayCommand GetFileCommand { get; private set; }
-
 
         public string Url
         {
@@ -59,7 +57,7 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             this.CancelCommand = new RelayCommand(CancelAction);
             this.GetFileCommand = new AsyncRelayCommand(GetFileActionAsync);
-            this.StartCommand = new AsyncRelayCommand(StartDownload);
+            this.StartCommand = new RelayCommand(StartDownload);
 
         }
 
@@ -68,7 +66,7 @@ namespace FileFlux.ViewModel
             this.PopModal();
         }
 
-        private async Task StartDownload()
+        private void StartDownload()
         {
             if (this._fileDownload != null)
             {
@@ -95,7 +93,7 @@ namespace FileFlux.ViewModel
         private void PopModal()
         {
             var window = App.Current?.Windows[0] as Window;
-            window.Page.Navigation.PopModalAsync();
+            window?.Page?.Navigation.PopModalAsync();
         }
     }
 }

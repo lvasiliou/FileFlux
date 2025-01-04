@@ -5,11 +5,6 @@
         public AppShell()
         {
             InitializeComponent();
-            var titleBar = new TitleBar
-            {
-                Title = "FileFlux",
-                Icon = "filefluxicon.ico"
-            };
         }
     }
 }

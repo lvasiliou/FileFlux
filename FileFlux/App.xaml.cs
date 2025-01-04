@@ -2,6 +2,10 @@
 using FileFlux.ViewModel;
 
 using System.Diagnostics;
+using FileFlux.Utilities;
+using FileFlux.Localization;
+
+
 
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -22,7 +26,7 @@ namespace FileFlux
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            Window wnd = null;
+            Window? wnd = null;
             var downloadsViewModel = _serviceProvider.GetService<DownloadsViewModel>();
             if (downloadsViewModel != null)
             {
@@ -35,16 +39,23 @@ namespace FileFlux
                 {
                     nativeWindow.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
                 }
-#else                
+#else
                 wnd = new Window(new NavigationPage(new DownloadsPage(downloadsViewModel)));
 #endif
             }
 
-            wnd.Destroying += (s, e) =>
+            if (wnd != null)
             {
-                var downloadManager = _serviceProvider.GetService<DownloadManager>();
-                downloadManager?.Dispose();
-            };
+                wnd.Destroying += (s, e) =>
+                {
+                    var downloadManager = _serviceProvider.GetService<DownloadManager>();
+                    downloadManager?.Dispose();
+                };
+            }
+            else
+            {
+                throw new InvalidOperationException(App_Resources.WindowFailureException);
+            }
 
             return wnd;
         }
@@ -53,7 +64,7 @@ namespace FileFlux
         {
             Debugger.Break();
             var queryParameters = System.Web.HttpUtility.ParseQueryString(uri.Query);
-            string? parameterValue = queryParameters?.Get("url");
+            string? parameterValue = queryParameters?.Get(Constants.LinkParameter);
             base.OnAppLinkRequestReceived(uri);
 
         }

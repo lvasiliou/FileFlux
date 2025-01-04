@@ -8,12 +8,11 @@ public class FileDownload : INotifyPropertyChanged
     private CancellationTokenSource _cancellationTokenSource = new();
 
     private Guid _id;
-    private Uri _url;
-    private string _fileName;
-    private string _savePath;
+    private Uri? _url;
+    private string? _fileName;
+    private string? _savePath;
     private double _percentCompleted;
     private FileDownloadStatuses _status;
-    private byte[]? _content;
     private string? _contentType;
     private string? _errorMessage;
     private long _totalSize;
@@ -21,7 +20,7 @@ public class FileDownload : INotifyPropertyChanged
     private DateTime _created;
     private long _totalDownloaded;
     private bool _supportsResume;
-    private string _eTag;
+    private string? _eTag;
 
     public Guid Id
     {
@@ -29,19 +28,19 @@ public class FileDownload : INotifyPropertyChanged
         set => SetProperty(ref _id, value);
     }
 
-    public Uri Url
+    public Uri? Url
     {
         get => _url;
         set => SetProperty(ref _url, value);
     }
 
-    public string FileName
+    public string? FileName
     {
         get => _fileName;
         set => SetProperty(ref _fileName, value);
     }
 
-    public string SavePath
+    public string? SavePath
     {
         get => _savePath;
         set => SetProperty(ref _savePath, value);
@@ -100,7 +99,7 @@ public class FileDownload : INotifyPropertyChanged
         set => SetProperty(ref _supportsResume, value);
     }
 
-    public string ETag
+    public string? ETag
     {
         get => _eTag;
         set => SetProperty(ref _eTag, value);

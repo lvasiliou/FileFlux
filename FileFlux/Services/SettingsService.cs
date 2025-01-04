@@ -1,23 +1,21 @@
 ﻿
 using FileFlux.Model;
+using FileFlux.Utilities;
 
 namespace FileFlux.Services
 {
     public class SettingsService
-    {
-        private const string overwriteBehaviourKey = "OverwriteKey";
-        private const string saveLocationKey = "SaveLocationKey";
+    { 
 
-        public bool GetOverwriteBehaviour() => GetSetting(overwriteBehaviourKey, false);
-        public bool SaveOverwriteBehaviour(bool value) => SaveSetting(overwriteBehaviourKey, value);
+        public bool GetOverwriteBehaviour() => GetSetting(Constants.OverwriteBehaviourSettingKey, false);
+        public bool SaveOverwriteBehaviour(bool value) => SaveSetting(Constants.OverwriteBehaviourSettingKey, value);
 
-        public string GetSaveLocation() => GetSetting(saveLocationKey, Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-        public bool SaveSaveLocation(string value) => SaveSetting(saveLocationKey, value);
+        public string GetSaveLocation() => GetSetting(Constants.SaveLocationSettingKey, Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        public bool SaveSaveLocation(string value) => SaveSetting(Constants.SaveLocationSettingKey, value);
 
         public T GetSetting<T>(string key, T defaultValue)
         {
-
-            object value = defaultValue switch
+            object? value = defaultValue switch
             {
                 string => Preferences.Get(key, defaultValue as string),
                 bool => Preferences.Get(key, Convert.ToBoolean(defaultValue)),
@@ -30,7 +28,12 @@ namespace FileFlux.Services
                 _ => throw new NotSupportedException($"Type {typeof(T)} is not supported")
             };
 
-            T? returnT = (T)Convert.ChangeType(value, typeof(T));
+            if (value is null)
+            {
+                return defaultValue;
+            }
+
+            T returnT = (T)Convert.ChangeType(value, typeof(T));
             return returnT;
         }
 
