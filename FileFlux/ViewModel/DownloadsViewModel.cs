@@ -71,7 +71,7 @@ namespace FileFlux.ViewModel
 
         private void NewDownloadAction(Object obj)
         {
-            Utility.OpenNewDownloadWindow();
+            Utility.OpenNewDownloadWindow(this._downloadManager);
         }
 
         private void ClearDownloadsAction(Object obj)

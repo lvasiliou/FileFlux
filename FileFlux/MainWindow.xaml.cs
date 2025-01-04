@@ -29,12 +29,16 @@ public partial class MainWindow : Window
 
     private void NewDownloadButtonClicked(object? sender, EventArgs e)
     {
-        Utility.OpenNewDownloadWindow();
+        var downloadManager = Application.Current?.Handler?.MauiContext?.Services.GetService<DownloadManager>();
+        if (downloadManager != null)
+        {
+            Utility.OpenNewDownloadWindow(downloadManager);
+        }
     }
 
     private void ClearDownloadsButtonClicked(object? sender, EventArgs e)
     {
-        var downloadManager = Application.Current.Handler.MauiContext.Services.GetService<DownloadManager>();
+        var downloadManager = Application.Current?.Handler?.MauiContext?.Services.GetService<DownloadManager>();
 
         if (downloadManager != null)
         {
@@ -44,10 +48,12 @@ public partial class MainWindow : Window
 
     private void OpenSettingsButtonClicked(object? sender, EventArgs e)
     {
-        var settingsService = Application.Current.Handler.MauiContext.Services.GetService<SettingsService>();
+        SettingsService? settingsService = Application.Current?.Handler?.MauiContext?.Services.GetService<SettingsService>();
+        if (settingsService == null)
+        {
+            throw new InvalidOperationException("SettingsService not found");
+        }
 
-        var settingsViewModel = new SettingsViewModel(settingsService);
-
-        this.Page.Navigation.PushModalAsync(new SettingsPage(settingsViewModel));
+        Utility.OpenSettingsWindow(new SettingsViewModel(settingsService));
     }
 }

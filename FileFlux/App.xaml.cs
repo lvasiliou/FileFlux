@@ -1,6 +1,8 @@
 ﻿using FileFlux.Services;
 using FileFlux.ViewModel;
 
+using System.Diagnostics;
+
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml.Media;
@@ -49,9 +51,10 @@ namespace FileFlux
 
         protected override void OnAppLinkRequestReceived(Uri uri)
         {
-            base.OnAppLinkRequestReceived(uri);
+            Debugger.Break();
             var queryParameters = System.Web.HttpUtility.ParseQueryString(uri.Query);
             string? parameterValue = queryParameters?.Get("url");
+            base.OnAppLinkRequestReceived(uri);
 
         }
     }

@@ -6,6 +6,8 @@ using Microsoft.Windows.AppLifecycle;
 
 using System.Diagnostics;
 
+using Windows.ApplicationModel.Activation;
+
 namespace FileFlux.WinUI
 {
     /// <summary>
@@ -26,31 +28,29 @@ namespace FileFlux.WinUI
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            var instance = AppInstance.FindOrRegisterForKey("FileFlux");
-            if (!instance.IsCurrent)
+            Debugger.Break();
+            switch (args.UWPLaunchActivatedEventArgs.Kind)
             {
-                var currentInstance = AppInstance.GetCurrent();
-                _=currentInstance.RedirectActivationToAsync(currentInstance.GetActivatedEventArgs());
+                case ActivationKind.Protocol:
+                    var uri = args.UWPLaunchActivatedEventArgs;
+                    //var queryParameters = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    //string? parameterValue = queryParameters?.Get("url");
+                    break;
+                case ActivationKind.Launch:
+                    var instance = AppInstance.FindOrRegisterForKey("FileFlux");
+                    if (!instance.IsCurrent)
+                    {
+                        var currentInstance = AppInstance.GetCurrent();
+                        _ = currentInstance.RedirectActivationToAsync(currentInstance.GetActivatedEventArgs());
 
-                Process.GetCurrentProcess().Kill();
+                        Process.GetCurrentProcess().Kill();
+                    }
+                    break;
             }
-            else
-            {
-                instance.Activated += InstanceActivated;
-            }
-
-            
 
             base.OnLaunched(args);
-
-
-
-
         }
 
-        private void InstanceActivated(object? sender, AppActivationArguments e)
-        {
-            Debugger.Break();
-        }
     }
+
 }

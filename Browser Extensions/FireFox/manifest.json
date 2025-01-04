@@ -1,24 +1,18 @@
 {
-  "manifest_version": 2,
-  "name": "FileFlux",
+  "manifest_version": 3,
+  "name": "FileFLux",
   "version": "1.0",
-  "description": "Redirects downloads to a Windows protocol handler.",
+  "description": "Intercepts downloads and redirects them to FileFlux.",
   "permissions": [
     "downloads",
     "downloads.open",
-    "tabs",
-    "<all_urls>"
+    "storage"
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": true
+    "service_worker": "background.js"
   },
-  "applications": {
-    "gecko": {
-      "id": "redirect-downloads@yourdomain.com",
-      "strict_min_version": "57.0"
-    }
-  }
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
 }

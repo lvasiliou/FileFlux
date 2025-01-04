@@ -7,17 +7,16 @@ namespace FileFlux.Utilities
 {
     internal class Utility
     {
-        public static void OpenNewDownloadWindow()
+        public static void OpenNewDownloadWindow(DownloadManager downloadManager)
         {
-            var downloadManager = Application.Current.Handler.MauiContext.Services.GetService<DownloadManager>();
             string url = string.Empty;
             var window = App.Current?.Windows[0] as Window;
             var newDownloadm = new NewDownloadViewModel(downloadManager);
             if (window != null)
             {
-                window.Page.Navigation.PushModalAsync(new NewDownloadPage(newDownloadm)).ContinueWith(x =>
+                window.Page?.Navigation.PushModalAsync(new NewDownloadPage(newDownloadm)).ContinueWith(x =>
                 {
-                    FileDownload fileDownload = newDownloadm.FileDownload;
+                    FileDownload? fileDownload = newDownloadm.FileDownload;
 
                     if (fileDownload != null)
                     {
@@ -29,6 +28,15 @@ namespace FileFlux.Utilities
                     }
 
                 });
+            }
+        }
+
+        public static void OpenSettingsWindow(SettingsViewModel settingsViewModel)
+        {
+            var window = App.Current?.Windows[0] as Window;
+            if (window != null)
+            {
+                window.Page?.Navigation.PushModalAsync(new SettingsPage(settingsViewModel));
             }
         }
     }

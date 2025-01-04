@@ -1,20 +1,42 @@
-browser.downloads.onCreated.addListener((downloadItem) => {
-    try {
-        console.log("Download started:", downloadItem);
+const isChrome = typeof chrome !== 'undefined' && typeof chrome.downloads !== 'undefined';
+const isFirefox = typeof browser !== 'undefined' && typeof browser.downloads !== 'undefined';
 
-        // Construct the custom protocol URL
-        const protocolUrl = `customprotocol://${downloadItem.url}`;
+const downloadsAPI = isChrome ? chrome.downloads : browser.downloads;
 
-        // Cancel the download
-        browser.downloads.cancel(downloadItem.id).then(() => {
-            console.log(`Download canceled: ${downloadItem.id}`);
+// Function to modify the URL and initiate the download with the fileflux:// protocol
+function modifyDownloadUrl(downloadItem) {
+    const originalUrl = downloadItem.finalUrl || downloadItem.url;
 
-            // Open the custom protocol URL in a new tab
-            browser.tabs.create({ url: protocolUrl }).then(() => {
-                console.log(`Redirected to: ${protocolUrl}`);
-            });
+    const encodedUrl = encodeURIComponent(originalUrl);
+
+    const modifiedUrl = `fileflux://${encodedUrl}`;
+
+    if (isChrome) {
+        chrome.tabs.create({ url: modifiedUrl }, (tab) => {
+            console.log("Opened fileflux:// protocol in a new tab, tab ID:", tab.id);
         });
-    } catch (error) {
-        console.error("Error handling download:", error);
+    } else if (isFirefox) {
+        browser.tabs.create({ url: modifiedUrl });
     }
-});
+}
+
+// Add a listener for download requests before the filename is determined
+const downloadDeterminingFilenameListener = (downloadItem, suggest) => {
+    if (downloadItem.url.startsWith('fileflux://')) {
+        return;
+    }
+
+    const originalUrl = downloadItem.finalUrl || downloadItem.url;
+
+    const encodedUrl = encodeURIComponent(originalUrl);
+
+    const modifiedUrl = `fileflux://${encodedUrl}`;
+
+    suggest({ filename: modifiedUrl });
+};
+
+if (isChrome) {
+    chrome.downloads.onDeterminingFilename.addListener(downloadDeterminingFilenameListener);
+} else if (isFirefox) {
+    browser.downloads.onCreated.addListener(modifyDownloadUrl);
+}
