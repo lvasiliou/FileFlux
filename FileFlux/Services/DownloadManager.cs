@@ -152,15 +152,17 @@ public partial class DownloadManager : IDisposable
 
     public void SaveToDisk()
     {
-        var json = JsonSerializer.Serialize(Downloads);
+        var downloadsToSerialise = Downloads.Where(item => item.SupportsResume || item.Status == FileDownloadStatuses.Completed);
+        var json = JsonSerializer.Serialize(downloadsToSerialise);
         var localAppDataPath = GetLocalAppDataPath();
         var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
         var directoryName = Path.GetDirectoryName(filePath) ?? string.Empty;
-        if (!string.IsNullOrWhiteSpace(directoryName) & !Directory.Exists(directoryName))
+        if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
         {
             Directory.CreateDirectory(directoryName);
-            File.WriteAllText(filePath, json);
         }
+
+        File.WriteAllText(filePath, json);
     }
 
     public void LoadFromDisk()
@@ -176,12 +178,19 @@ public partial class DownloadManager : IDisposable
             {
                 foreach (var download in downloads)
                 {
-                    Downloads.Add(download);
-
-                    if (download.Status == FileDownloadStatuses.InProgress)
+                    bool fileExists = File.Exists(download.SavePath);
+                    if (fileExists)
                     {
-                        //todo: restart download
-                    }
+                        var fileinfo = new FileInfo(download?.SavePath);
+                        if (fileinfo.Length == download.TotalDownloaded)
+                        {
+                            Downloads.Add(download);
+                            if (download.Status == FileDownloadStatuses.Paused)
+                            {
+                                _ = this.StartDownloadAsync(download);
+                            }                            
+                        }
+                    }                    
                 }
             }
         }

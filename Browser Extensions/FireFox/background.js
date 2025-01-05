@@ -7,9 +7,7 @@ const downloadsAPI = isChrome ? chrome.downloads : browser.downloads;
 function modifyDownloadUrl(downloadItem) {
     const originalUrl = downloadItem.finalUrl || downloadItem.url;
 
-    const encodedUrl = encodeURIComponent(originalUrl);
-
-    const modifiedUrl = `fileflux://${encodedUrl}`;
+    const modifiedUrl = `fileflux://${originalUrl}`;
 
     if (isChrome) {
         chrome.tabs.create({ url: modifiedUrl }, (tab) => {
@@ -28,9 +26,8 @@ const downloadDeterminingFilenameListener = (downloadItem, suggest) => {
 
     const originalUrl = downloadItem.finalUrl || downloadItem.url;
 
-    const encodedUrl = encodeURIComponent(originalUrl);
 
-    const modifiedUrl = `fileflux://${encodedUrl}`;
+    const modifiedUrl = `fileflux://${originalUrl}`;
 
     suggest({ filename: modifiedUrl });
 };

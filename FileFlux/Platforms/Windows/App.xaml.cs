@@ -2,55 +2,99 @@
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
+using FileFlux.Services;
+using FileFlux.Utilities;
+
+using Microsoft.UI.Dispatching;
+using Microsoft.Maui.Controls;
 using Microsoft.Windows.AppLifecycle;
 
-using System.Diagnostics;
-
 using Windows.ApplicationModel.Activation;
+using FileFlux.Model;
 
-namespace FileFlux.WinUI
+
+namespace FileFlux.WinUI;
+
+/// <summary>
+/// Provides application-specific behavior to supplement the default Application class.
+/// </summary>
+public partial class App : MauiWinUIApplication
 {
     /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
+    /// Initializes the singleton application object.  This is the first line of authored code
+    /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
-    public partial class App : MauiWinUIApplication
+    public App()
     {
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
-        public App()
-        {
-            this.InitializeComponent();
-        }
+        this.InitializeComponent();
+    }
 
-        protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
-
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        WinRT.ComWrappersSupport.InitializeComWrappers();
+        bool isRedirect = DecideRedirection();
+        if (!isRedirect)
         {
-            Debugger.Break();
-            switch (args.UWPLaunchActivatedEventArgs.Kind)
+            Microsoft.UI.Xaml.Application.Start((p) =>
             {
-                case ActivationKind.Protocol:
-                    var uri = args.UWPLaunchActivatedEventArgs;
-                    //var queryParameters = System.Web.HttpUtility.ParseQueryString(uri.Query);
-                    //string? parameterValue = queryParameters?.Get("url");
-                    break;
-                case ActivationKind.Launch:
-                    var instance = AppInstance.FindOrRegisterForKey("FileFlux");
-                    if (!instance.IsCurrent)
-                    {
-                        var currentInstance = AppInstance.GetCurrent();
-                        _ = currentInstance.RedirectActivationToAsync(currentInstance.GetActivatedEventArgs());
-
-                        Process.GetCurrentProcess().Kill();
-                    }
-                    break;
-            }
-
-            base.OnLaunched(args);
+                var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
+                SynchronizationContext.SetSynchronizationContext(context);
+                _ = new App();
+            });
         }
 
     }
 
+    private static bool DecideRedirection()
+    {
+        bool isRedirect = false;
+        AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
+
+        ExtendedActivationKind kind = args.Kind;
+        AppInstance keyInstance = AppInstance.FindOrRegisterForKey(Constants.InstanceKey);
+
+        if (keyInstance.IsCurrent)
+        {
+            keyInstance.Activated += OnActivated;
+
+        }
+        else
+        {
+            isRedirect = true;
+            keyInstance.RedirectActivationToAsync(args).AsTask().Wait();
+        }
+
+        return isRedirect;
+    }
+
+    private static void OnActivated(object? sender, AppActivationArguments args)
+    {
+        ExtendedActivationKind kind = args.Kind;
+        if (args.Kind == ExtendedActivationKind.Protocol && args.Data is ProtocolActivatedEventArgs)
+        {
+            var protocolArgs = (ProtocolActivatedEventArgs)args.Data;
+            var uri = protocolArgs.Uri;
+            var downloadManager = Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services.GetService<DownloadManager>();
+
+            if (downloadManager != null)
+            {
+                string rawUrl = uri.ToString().Replace("fileflux://", string.Empty, StringComparison.OrdinalIgnoreCase);
+                var colonPos = rawUrl.IndexOf("//");
+                var url = rawUrl.Insert(colonPos, ":");
+                FileDownload? download = downloadManager.NewDownload(url).Result;
+                if (download != null)
+                {
+                    MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        downloadManager.AddDownload(download);
+                        _ = downloadManager.StartDownloadAsync(download);
+                    });
+
+                }
+            }
+        }
+    }
+
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }

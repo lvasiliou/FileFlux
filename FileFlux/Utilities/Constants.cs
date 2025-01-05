@@ -8,6 +8,7 @@
         public const string DownloadsPersistenceFileName = "downloads.json";
         public const string AppLocalDataFolder = "FileFlux";
         public const string BytesRangeHeader = "bytes";
+        internal const string InstanceKey = "FileFlux";
         #endregion
 
         public const string UnitBytes = "B";
@@ -20,7 +21,7 @@
 
         #region Exceptions
         public const string SavePathEmptyException = "Save Path cannot be null or whitespace.";
-        public const string DirectoryNotDeterminedException = "Directory name cannot be determined.";
+        public const string DirectoryNotDeterminedException = "Directory name cannot be determined.";        
         #endregion
 
     }
