@@ -83,10 +83,10 @@
 								<Label Text="{Binding Status, Converter={StaticResource StatusConverter}, StringFormat='Status: {0}'}" FontSize="Micro">
 									<Label.Triggers>
 										<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
-											<Setter Property="TextColor" Value="DarkRed"/>
+											<Setter Property="TextColor" Value="{AppThemeBinding Light=DarkRed, Dark=Red}"/>
 										</DataTrigger>
 										<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}">
-											<Setter Property="TextColor" Value="Green"/>
+											<Setter Property="TextColor" Value="{AppThemeBinding Light=DarkGreen, Dark=LightGreen}"/>
 										</DataTrigger>
 									</Label.Triggers>
 								</Label>
