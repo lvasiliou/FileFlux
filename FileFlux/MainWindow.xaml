@@ -13,18 +13,18 @@
 				<HorizontalStackLayout HorizontalOptions="End" Spacing="6">					
 					<ImageButton BackgroundColor="Transparent" BorderWidth="0" x:Name="newDownloadButton">
 						<ImageButton.Source>
-							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf019;"/>
+							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf019;" Color="{StaticResource PrimaryColor}"/>
 						</ImageButton.Source>
 					</ImageButton>
 					<ImageButton BackgroundColor="Transparent" BorderWidth="0" x:Name="clearDownloadsButton">
 						<ImageButton.Source>
-							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf51a;" />
+							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf51a;" Color="{StaticResource PrimaryColor}" />
 						</ImageButton.Source>
 					</ImageButton>
-					<BoxView VerticalOptions="FillAndExpand" Margin="0,14" Color="DarkGray" WidthRequest="1" MaximumWidthRequest="1" />
+					<BoxView VerticalOptions="FillAndExpand" Margin="0,14" Color="{StaticResource PrimaryColor}" WidthRequest="1" MaximumWidthRequest="1" />
 					<ImageButton BackgroundColor="Transparent" BorderWidth="0" Grid.Column="2" x:Name="openSettingsButton">
 						<ImageButton.Source>
-							<FontImageSource FontFamily="FAS" Glyph="&#xf013;" Size="18" />
+							<FontImageSource FontFamily="FAS" Glyph="&#xf013;" Size="18" Color="{StaticResource PrimaryColor}" />
 						</ImageButton.Source>
 					</ImageButton>
 				</HorizontalStackLayout>

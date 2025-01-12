@@ -4,7 +4,6 @@ using FileFlux.Model;
 using FileFlux.Services;
 
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace FileFlux.ViewModel
 {
@@ -14,10 +13,11 @@ namespace FileFlux.ViewModel
 
         private FileDownload? _fileDownload = null;
         private string _url = string.Empty;
+        private string _errorMesssage = string.Empty;
 
         public IRelayCommand CancelCommand { get; private set; }
 
-        public IRelayCommand StartCommand { get; private set; }
+        public IAsyncRelayCommand StartCommand { get; private set; }
 
         public IAsyncRelayCommand GetFileCommand { get; private set; }
 
@@ -50,6 +50,17 @@ namespace FileFlux.ViewModel
             }
         }
 
+        public string ErrorMessage
+        {
+            get => this._errorMesssage;
+            set
+            {
+                this._errorMesssage = value;
+
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ErrorMessage)));
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public NewDownloadViewModel(DownloadManager downloadManager)
@@ -57,7 +68,7 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             this.CancelCommand = new RelayCommand(CancelAction);
             this.GetFileCommand = new AsyncRelayCommand(GetFileActionAsync);
-            this.StartCommand = new RelayCommand(StartDownload);
+            this.StartCommand = new AsyncRelayCommand(StartDownload);
 
         }
 
@@ -66,12 +77,12 @@ namespace FileFlux.ViewModel
             this.PopModal();
         }
 
-        private void StartDownload()
+        private async Task StartDownload()
         {
             if (this._fileDownload != null)
             {
-                this._downloadManager.AddDownload(this._fileDownload);
                 _ = this._downloadManager.StartDownloadAsync(this._fileDownload);
+                this._downloadManager.AddDownload(this._fileDownload);
                 this.PopModal();
             }
         }
@@ -82,7 +93,7 @@ namespace FileFlux.ViewModel
             {
                 if (task.IsFaulted)
                 {
-                    Debug.WriteLine(task.Exception?.Message);
+                    this.ErrorMessage = task.Exception.Message;
                     return;
                 }
 

@@ -17,7 +17,7 @@ public partial class MainWindow : Window
 
         if (wnd != null)
         {
-            wnd.SystemBackdrop = new MicaBackdrop { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt };
+            wnd.SystemBackdrop = new MicaBackdrop { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
         }
 
 #endif

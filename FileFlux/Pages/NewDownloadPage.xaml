@@ -43,7 +43,7 @@
 			</Button>
 		</HorizontalStackLayout>
 
-		<Border Grid.Row="2" Stroke="DarkGray" BackgroundColor="Transparent" Padding="10">
+		<Border Grid.Row="2" Stroke="{DynamicResource PrimaryColor}" BackgroundColor="Transparent" Padding="10">
 			<VerticalStackLayout Spacing="10">
 				<Label Text="File Details" FontSize="Caption"/>
 				<Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" FontSize="Small"/>
@@ -56,6 +56,7 @@
 						</DataTrigger>
 					</Label.Triggers>
 				</Label>
+				<Label Text="{Binding ErrorMessage, StringFormat='ErrorMessage:{0}'}" FontSize="Micro" TextColor="MediumVioletRed" IsVisible="Collapse" x:Name="ErrorLabel" />
 			</VerticalStackLayout>
 		</Border>
 

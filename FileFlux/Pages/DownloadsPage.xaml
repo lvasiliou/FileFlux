@@ -13,18 +13,18 @@
 			 Title="Downloads - FileFlux">
 	<ContentPage.Resources>
 		<ResourceDictionary>
-			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" x:Key="PauseGlyph" />
-			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" x:Key="ResumeGlyph" />
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" Color="{DynamicResource PrimaryColor}" x:Key="PauseGlyph" />
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" Color="{DynamicResource PrimaryColor}" x:Key="ResumeGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c7;" x:Key="FileAudioGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c8;" x:Key="FileVideoGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c6;" x:Key="FileArchiveGlyph" />			
+			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c6;" x:Key="FileArchiveGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c5;" x:Key="FileImageGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c2;" x:Key="FileWordGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c3;" x:Key="FileExcelGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c4;" x:Key="FilePowerPointGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c1;" x:Key="FilePdfGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15c;" x:Key="FileTextGlyph" />
-			
+
 		</ResourceDictionary>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 		<local:StatusConverter x:Key="StatusConverter" />
@@ -70,7 +70,7 @@
 							</Grid.ColumnDefinitions>
 							<Image Grid.Column="0">
 								<Image.Source>
-									<FontImageSource FontFamily="FAS" Glyph="&#xf15b;" Size="64" />
+									<FontImageSource FontFamily="FAS" Glyph="&#xf15b;" Size="64" Color="{DynamicResource PrimaryColor}" />
 								</Image.Source>
 								<Image.Triggers>
 									<DataTrigger Binding="{Binding ContentType}" TargetType="Image" Value="">
@@ -83,10 +83,10 @@
 								<Label Text="{Binding Status, Converter={StaticResource StatusConverter}, StringFormat='Status: {0}'}" FontSize="Micro">
 									<Label.Triggers>
 										<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
-											<Setter Property="TextColor" Value="Red"/>
+											<Setter Property="TextColor" Value="DarkRed"/>
 										</DataTrigger>
 										<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}">
-											<Setter Property="TextColor" Value="LightGreen"/>
+											<Setter Property="TextColor" Value="Green"/>
 										</DataTrigger>
 									</Label.Triggers>
 								</Label>
@@ -107,7 +107,7 @@
 										</DataTrigger>
 									</ImageButton.Triggers>
 									<ImageButton.Source>
-										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="Red"/>
+										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="DarkRed"/>
 									</ImageButton.Source>
 								</ImageButton>
 								<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.ToggleDownloadStatus}" CommandParameter="{Binding .}" IsVisible="Collapse">
@@ -129,7 +129,7 @@
 								</ImageButton>
 								<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Delete Download" IsVisible="Collapse">
 									<ImageButton.Source>
-										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf1f8;" />
+										<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf1f8;" Color="{StaticResource PrimaryColor}" />
 									</ImageButton.Source>
 									<ImageButton.Triggers>
 										<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}" TargetType="ImageButton">
@@ -138,7 +138,7 @@
 									</ImageButton.Triggers>
 								</ImageButton>
 							</HorizontalStackLayout>
-							<BoxView Color="White" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" HeightRequest="1" Margin="10,0" />
+							<BoxView Color="{DynamicResource PrimaryColor}" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" HeightRequest="1" Margin="10,0" />
 						</Grid>
 					</ViewCell>
 				</DataTemplate>

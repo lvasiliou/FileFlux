@@ -5,11 +5,10 @@ using System.Diagnostics;
 using FileFlux.Utilities;
 using FileFlux.Localization;
 
-
-
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI.ViewManagement;
 #endif
 
 namespace FileFlux
@@ -17,12 +16,38 @@ namespace FileFlux
     public partial class App : Application
     {
         private readonly IServiceProvider _serviceProvider;
+
         public App(IServiceProvider serviceProvider)
         {
-            InitializeComponent();
             this._serviceProvider = serviceProvider;
+            InitializeComponent();
+
+#if WINDOWS
+            var uiSettings = new UISettings();
+            uiSettings.ColorValuesChanged += (sender, e) =>
+            {
+                this.SetAccentColor(uiSettings);
+            };
+
+            this.SetAccentColor(uiSettings);
+#endif            
 
         }
+
+#if WINDOWS
+        private void SetAccentColor(UISettings uiSettings)
+        {
+
+            var winColor = uiSettings.GetColorValue(UIColorType.Accent);
+            Color accentColor = Color.Parse(winColor.ToString());
+
+            if (Resources.ContainsKey("PrimaryColor"))
+            {
+                this.Resources["PrimaryColor"] = accentColor;
+            }
+
+        }
+#endif
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
@@ -37,7 +62,7 @@ namespace FileFlux
                 var nativeWindow = mainWindow.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
                 if (nativeWindow != null)
                 {
-                    nativeWindow.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
+                    nativeWindow.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.Base };
                 }
 #else
                 wnd = new Window(new NavigationPage(new DownloadsPage(downloadsViewModel)));
