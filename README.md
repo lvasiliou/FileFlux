@@ -46,12 +46,6 @@ FileFlux is a fast, practical, and visually stunning download manager built with
     dotnet run
     ```
 
-## Usage
-
-- **Start Download**: Enter the URL of the file you want to download and click the download button.
-- **Pause/Resume Download**: Manage your downloads by pausing and resuming them as needed.
-- **Manage Downloads**: View and organize your downloads with a user-friendly interface.
-
 ## Contributing
 
 We welcome contributions to make FileFlux even better! To contribute:
