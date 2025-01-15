@@ -23,7 +23,7 @@ FileFlux is a fast, practical, and visually stunning download manager built with
 
 1. **Clone the repository**:
     ```sh
-    git clone https://github.com/yourusername/FileFlux.git
+    git clone https://github.com/lvasiliou/FileFlux.git
     ```
 
 2. **Navigate to the project directory**:
