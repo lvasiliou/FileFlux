@@ -1,0 +1,41 @@
+name: Nightly Release
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '9.x.x'  # Specify the .NET 9 version
+
+      - name: Build and Pack
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly-build-$(date +%Y-%m-%d)
+          release_name: Nightly Build $(date +%Y-%m-%d)
+          draft: false
+          prerelease: true
+          files: ./nupkg/*.nupkg
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: nightly-build-artifacts
+          path: ./nupkg/*.nupkg
+          retention-days: 1
