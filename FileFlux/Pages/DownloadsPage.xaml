@@ -24,7 +24,6 @@
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c4;" x:Key="FilePowerPointGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c1;" x:Key="FilePdfGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15c;" x:Key="FileTextGlyph" />
-
 		</ResourceDictionary>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 		<local:StatusConverter x:Key="StatusConverter" />
@@ -42,7 +41,7 @@
 		</ToolbarItem>
 	</ContentPage.ToolbarItems>
 	<ScrollView BackgroundColor="Transparent">
-		<ListView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectionMode="None">
+		<ListView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectionMode="None" CachingStrategy="RecycleElementAndDataTemplate">
 			<ListView.ItemTemplate>
 				<DataTemplate x:DataType="model:FileDownload">
 					<ViewCell>
@@ -124,6 +123,16 @@
 										</DataTrigger>
 										<DataTrigger Binding="{Binding SupportsResume}" Value="True" TargetType="ImageButton">
 											<Setter Property="IsVisible" Value="Visible" />
+										</DataTrigger>
+									</ImageButton.Triggers>
+								</ImageButton>
+								<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage},Path=BindingContext.OpenFileCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Open" IsVisible="Collapse">
+									<ImageButton.Source>
+										<FontImageSource FontFamily="FAS" Glyph="&#xf07c;" Size="18" Color="{StaticResource PrimaryColor}" />
+									</ImageButton.Source>
+									<ImageButton.Triggers>
+										<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}" TargetType="ImageButton">
+											<Setter Property="IsVisible" Value="Visible"/>
 										</DataTrigger>
 									</ImageButton.Triggers>
 								</ImageButton>

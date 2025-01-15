@@ -5,6 +5,7 @@ using FileFlux.Services;
 using FileFlux.Utilities;
 
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace FileFlux.ViewModel
@@ -25,6 +26,8 @@ namespace FileFlux.ViewModel
 
         public IRelayCommand DeleteCommand { get; private set; }
 
+        public IRelayCommand OpenFileCommand { get; private set; }
+
         public DownloadsViewModel(DownloadManager downloadManager)
         {
             Downloads = downloadManager.Downloads;
@@ -34,6 +37,7 @@ namespace FileFlux.ViewModel
             this.CancelDownload = new AsyncRelayCommand<FileDownload>(CancelDownloadAction);
             this.ToggleDownloadStatus = new AsyncRelayCommand<FileDownload>(ToggleDownloadStatusAction);
             this.DeleteCommand = new RelayCommand<FileDownload>(DeleteAction);
+            this.OpenFileCommand = new RelayCommand<FileDownload>(OpenAction);            
         }
 
         private void DeleteAction(FileDownload? fileDownload)
@@ -50,6 +54,16 @@ namespace FileFlux.ViewModel
                     }
                 }
                 catch { }
+            }
+        }
+
+        private void OpenAction(FileDownload fileDownload)
+        {
+            if (fileDownload != null && fileDownload.Status == FileDownloadStatuses.Completed)
+            {
+#if WINDOWS
+                Process.Start(new ProcessStartInfo(fileDownload.SavePath) { UseShellExecute = true });
+#endif
             }
         }
 

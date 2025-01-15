@@ -109,6 +109,7 @@ namespace FileFlux.Services
                                 switch (fileDownload.Status)
                                 {
                                     case FileDownloadStatuses.Paused:
+                                        fileDownload.CancellationTokenSource = new CancellationTokenSource();
                                         return;
                                     case FileDownloadStatuses.Cancelled:
                                         File.Delete(fileDownload.SavePath);
@@ -138,6 +139,7 @@ namespace FileFlux.Services
         {
             fileDownload.Status = FileDownloadStatuses.Paused;
             await fileDownload.CancellationTokenSource.CancelAsync();
+
         }
 
         public async Task CancelDownload(FileDownload fileDownload)
