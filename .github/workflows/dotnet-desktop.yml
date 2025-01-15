@@ -31,11 +31,17 @@ jobs:
           release_name: Nightly Build $(date +%Y-%m-%d)
           draft: false
           prerelease: true
-          files: ./nupkg/*.nupkg
+          files: |
+            ./bin/Release/net9.0/win10-x64/publish/*
+            # ./bin/Release/net9.0/osx-x64/publish/*
+            # ./bin/Release/net9.0/ios-arm64/publish/*
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: nightly-build-artifacts
-          path: ./nupkg/*.nupkg
-          retention-days: 1
+          path: |
+            ./bin/Release/net9.0/win10-x64/publish/*
+            # ./bin/Release/net9.0/osx-x64/publish/*
+            # ./bin/Release/net9.0/ios-arm64/publish/*
+          retention-days: 5
