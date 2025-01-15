@@ -11,6 +11,9 @@ FileFlux is a fast, practical, and visually stunning download manager built with
 - **Cross-Platform**: Available on Windows. macOS, iOS, and Android coming soon!
 - **Supported Protocols**: HTTP/S. FTP/S & magnet coming soon.
 
+![FileFlux Light](FileFlux-Light.png)
+![FileFlux Dark](FileFlux-Dark.png)
+
 ## Getting Started
 
 ### Prerequisites
