@@ -21,6 +21,8 @@ jobs:
       - name: restore dependencies
         run: dotnet restore
 
+      - name: restore workloads
+        run: dotnet workload restore
       - name: Build and Pack
         run: |
           chmod +x ./build.sh
