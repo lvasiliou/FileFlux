@@ -10,12 +10,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.x.x'  # Specify the .NET 9 version
+          dotnet-version: '9.x'  # Specify the .NET 9 version
+
+      - name: restore dependencies
+        run: dotnet restore
 
       - name: Build and Pack
         run: |
@@ -37,7 +40,7 @@ jobs:
             # ./bin/Release/net9.0/ios-arm64/publish/*
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: nightly-build-artifacts
           path: |
