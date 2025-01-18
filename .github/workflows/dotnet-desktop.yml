@@ -11,13 +11,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - task: UseDotNet@2
-        inputs:
-            packageType: 'sdk'
-            version: '9.0.102'
-
+      - name: setup net
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.1.102'
+         
       - name: restore workloads
         run: dotnet workload restore
 
