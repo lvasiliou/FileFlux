@@ -30,14 +30,22 @@ jobs:
       - name: Build and Pack
         run: dotnet publish -f net9.0-windows10.0.26100.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None
 
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          tag_name: nightly-build-$(date +%Y-%m-%d)
-          release_name: Nightly Build $(date +%Y-%m-%d)
-          draft: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "nightly"
           prerelease: true
-          files: |
-            ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*            
+          title: "Nightly Build"
+          files: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
+
+#      - name: Create Release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: nightly-build-$(date +%Y-%m-%d)
+#          release_name: Nightly Build $(date +%Y-%m-%d)
+#          draft: false
+#          prerelease: true
+#          files: |
+#            ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
