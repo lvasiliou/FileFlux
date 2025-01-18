@@ -1,34 +1,35 @@
-name: Nightly Release
+name: Nightly Build
 
 on:
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
   workflow_dispatch: # manual run
-
+  
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
-      - name: setup net
-      - uses: actions/setup-dotnet@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x.x'
-         
-      - name: restore workloads
-        run: dotnet workload restore
+          dotnet-version: '9.0.x'
 
-      - name: restore dependencies
-        run: dotnet restore      
-        
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libgdk-pixbuf2.0-dev
+          sudo apt-get install -y libgl-dev
+          sudo apt-get install -y libsecret-1-dev
+
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Build and Pack
         run: |
           chmod +x ./build.sh
           ./build.sh
-
 
       - name: Create Release
         uses: actions/create-release@v1
