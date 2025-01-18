@@ -1,21 +1,30 @@
-name: Nightly Release
+name: Nightly Build
 
 on:
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
-
+  workflow_dispatch: # manual run
+  
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x.x'  # Specify the .NET 9 version
+          dotnet-version: '9.0.x'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libgdk-pixbuf2.0-dev
+          sudo apt-get install -y libgl-dev
+          sudo apt-get install -y libsecret-1-dev
+
+      - name: Restore dependencies
+        run: dotnet restore
 
       - name: Build and Pack
         run: |
@@ -35,13 +44,3 @@ jobs:
             ./bin/Release/net9.0/win10-x64/publish/*
             # ./bin/Release/net9.0/osx-x64/publish/*
             # ./bin/Release/net9.0/ios-arm64/publish/*
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: nightly-build-artifacts
-          path: |
-            ./bin/Release/net9.0/win10-x64/publish/*
-            # ./bin/Release/net9.0/osx-x64/publish/*
-            # ./bin/Release/net9.0/ios-arm64/publish/*
-          retention-days: 5
