@@ -23,21 +23,12 @@ jobs:
           dotnet workload install maui-desktop
           dotnet workload install maui-ios
           dotnet workload install maui-tizen
-
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y libgdk-pixbuf2.0-dev
-          sudo apt-get install -y libgl-dev
-          sudo apt-get install -y libsecret-1-dev
-
+      
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build and Pack
-        run: |
-          chmod +x ./build.sh
-          ./build.sh
+        run: dotnet publish -f net9.0-windows10.0.26100.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None
 
       - name: Create Release
         uses: actions/create-release@v1
@@ -49,6 +40,4 @@ jobs:
           draft: false
           prerelease: true
           files: |
-            ./bin/Release/net9.0/win10-x64/publish/*
-            # ./bin/Release/net9.0/osx-x64/publish/*
-            # ./bin/Release/net9.0/ios-arm64/publish/*
+            ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*            
