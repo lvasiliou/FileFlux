@@ -7,7 +7,7 @@ on:
   
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,31 +16,36 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-
-      - name: Install dependencies
+          
+      - name: Restore .NET MAUI Workloads
         run: |
-          sudo apt-get install -y libgdk-pixbuf2.0-dev
-          sudo apt-get install -y libgl-dev
-          sudo apt-get install -y libsecret-1-dev
-
+          dotnet workload install maui-android
+          dotnet workload install maui-desktop
+          dotnet workload install maui-ios
+          dotnet workload install maui-tizen
+      
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build and Pack
-        run: |
-          chmod +x ./build.sh
-          ./build.sh
+        run: dotnet publish -f net9.0-windows10.0.26100.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None
 
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          tag_name: nightly-build-$(date +%Y-%m-%d)
-          release_name: Nightly Build $(date +%Y-%m-%d)
-          draft: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "nightly"
           prerelease: true
-          files: |
-            ./bin/Release/net9.0/win10-x64/publish/*
-            # ./bin/Release/net9.0/osx-x64/publish/*
-            # ./bin/Release/net9.0/ios-arm64/publish/*
+          title: "Nightly Build"
+          files: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
+
+#      - name: Create Release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: nightly-build-$(date +%Y-%m-%d)
+#          release_name: Nightly Build $(date +%Y-%m-%d)
+#          draft: false
+#          prerelease: true
+#          files: |
+#            ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
