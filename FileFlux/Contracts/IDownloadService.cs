@@ -4,12 +4,12 @@ namespace FileFlux.Contracts
 {
     public interface IDownloadService
     {
-        public Task<FileDownload> GetMetadata(Uri uri);
+        public Task<Download> GetMetadata(Uri uri);
 
-        public Task StartDownloadAsync(FileDownload fileDownload);
+        public Task StartDownloadAsync(Download fileDownload);
 
-        public Task PauseDownload(FileDownload fileDownload);
+        public Task PauseDownload(Download fileDownload);
         
-        public Task CancelDownload(FileDownload fileDownload);
+        public Task CancelDownload(Download fileDownload);
     }
 }

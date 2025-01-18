@@ -16,7 +16,7 @@ namespace FileFlux.Utilities
             {
                 window.Page?.Navigation.PushModalAsync(new NewDownloadPage(newDownloadm)).ContinueWith(x =>
                 {
-                    FileDownload? fileDownload = newDownloadm.FileDownload;
+                    Download? fileDownload = newDownloadm.FileDownload;
 
                     if (fileDownload != null)
                     {

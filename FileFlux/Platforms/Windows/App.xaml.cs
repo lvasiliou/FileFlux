@@ -82,7 +82,7 @@ public partial class App : MauiWinUIApplication
                 string rawUrl = uri.ToString().Replace("fileflux://", string.Empty, StringComparison.OrdinalIgnoreCase);
                 var colonPos = rawUrl.IndexOf("//");
                 var url = rawUrl.Insert(colonPos, ":");
-                FileDownload? download = downloadManager.NewDownload(url).Result;
+                Download? download = downloadManager.NewDownload(url).Result;
                 if (download != null)
                 {
                     MainThread.InvokeOnMainThreadAsync(() =>

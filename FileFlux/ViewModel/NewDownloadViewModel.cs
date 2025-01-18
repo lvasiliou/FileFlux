@@ -11,7 +11,7 @@ namespace FileFlux.ViewModel
     {
         private readonly DownloadManager _downloadManager;
 
-        private FileDownload? _fileDownload = null;
+        private Download? _fileDownload = null;
         private string _url = string.Empty;
         private string _errorMesssage = string.Empty;
 
@@ -31,7 +31,7 @@ namespace FileFlux.ViewModel
             }
         }
 
-        public FileDownload? FileDownload
+        public Download? FileDownload
         {
             get => this._fileDownload;
             set

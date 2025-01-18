@@ -50,7 +50,7 @@ namespace FileFlux.Services
             }
         }
 
-        internal void PauseDownload(FileDownload download)
+        internal void PauseDownload(Download download)
         {
             throw new NotImplementedException();
         }

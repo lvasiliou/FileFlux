@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace FileFlux.Model;
-public class FileDownload : INotifyPropertyChanged
+public class Download : INotifyPropertyChanged
 {
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -103,6 +103,11 @@ public class FileDownload : INotifyPropertyChanged
     {
         get => _eTag;
         set => SetProperty(ref _eTag, value);
+    }
+
+    public string? Type
+    {
+        get => this._contentType?.Substring(0,this._contentType.IndexOf('/')) ?? string.Empty;
     }
 
     [JsonIgnore]

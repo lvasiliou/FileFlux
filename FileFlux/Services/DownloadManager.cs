@@ -14,7 +14,7 @@ public partial class DownloadManager : IDisposable
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
 
-    public ObservableCollection<FileDownload> Downloads = new();
+    public ObservableCollection<Download> Downloads = new();
 
     public DownloadManager(DownloadServiceFactory downloadServiceFactory, SettingsService settingsService)
     {
@@ -23,13 +23,13 @@ public partial class DownloadManager : IDisposable
         this.LoadFromDisk();
     }
 
-    public async Task<FileDownload> NewDownload(string url)
+    public async Task<Download> NewDownload(string url)
     {
         try
         {
             var uri = new Uri(url);
             var _downloadService = this._downloadServiceFactory.GetService(uri);
-            FileDownload fileDownload = await _downloadService.GetMetadata(uri);
+            Download fileDownload = await _downloadService.GetMetadata(uri);
 
             var filename = fileDownload.FileName;
             if (!string.IsNullOrWhiteSpace(filename))
@@ -48,11 +48,11 @@ public partial class DownloadManager : IDisposable
         }
         catch (Exception ex)
         {
-            return await Task.FromException<FileDownload>(ex);
+            return await Task.FromException<Download>(ex);
         }
     }
 
-    public async Task StartDownloadAsync(FileDownload? fileDownload)
+    public async Task StartDownloadAsync(Download? fileDownload)
     {
         try
         {
@@ -73,7 +73,7 @@ public partial class DownloadManager : IDisposable
         }
     }
 
-    public async Task PauseDownload(FileDownload? fileDownload)
+    public async Task PauseDownload(Download? fileDownload)
     {
         if (fileDownload != null && fileDownload.Url != null)
         {
@@ -82,7 +82,7 @@ public partial class DownloadManager : IDisposable
         }
     }
 
-    public async Task CancelDownload(FileDownload fileDownload)
+    public async Task CancelDownload(Download fileDownload)
     {
         if (fileDownload != null && fileDownload.Url != null)
         {
@@ -91,7 +91,7 @@ public partial class DownloadManager : IDisposable
         }
     }
 
-    public async Task ResumeDownload(FileDownload fileDownload)
+    public async Task ResumeDownload(Download fileDownload)
     {
         if (fileDownload != null && fileDownload.Url != null)
         {
@@ -100,12 +100,12 @@ public partial class DownloadManager : IDisposable
             await _downloadService.StartDownloadAsync(fileDownload);
         }
     }
-    public void AddDownload(FileDownload download)
+    public void AddDownload(Download download)
     {
         Downloads.Add(download);
     }
 
-    public async void RemoveDownload(FileDownload download)
+    public async void RemoveDownload(Download download)
     {
         if (download.Status == FileDownloadStatuses.InProgress)
         {
@@ -116,7 +116,7 @@ public partial class DownloadManager : IDisposable
 
     }
 
-    public async Task<bool> VerifyDownload(FileDownload fileDownload, string hash)
+    public async Task<bool> VerifyDownload(Download fileDownload, string hash)
     {
         bool verified = false;
 
@@ -144,16 +144,15 @@ public partial class DownloadManager : IDisposable
     {
         var itemsToRemove = Downloads.Where(item => item.Status != FileDownloadStatuses.InProgress).ToList();
 
-        foreach (FileDownload fileDownload in itemsToRemove)
+        foreach (Download fileDownload in itemsToRemove)
         {
             Downloads.Remove(fileDownload);
         }
     }
 
     public void SaveToDisk()
-    {
-        var downloadsToSerialise = Downloads.Where(item => item.SupportsResume || item.Status == FileDownloadStatuses.Completed);
-        var json = JsonSerializer.Serialize(downloadsToSerialise);
+    {        
+        var json = JsonSerializer.Serialize(this.Downloads);
         var localAppDataPath = GetLocalAppDataPath();
         var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
         var directoryName = Path.GetDirectoryName(filePath) ?? string.Empty;
@@ -172,7 +171,7 @@ public partial class DownloadManager : IDisposable
         if (File.Exists(filePath))
         {
             var json = File.ReadAllText(filePath);
-            var downloads = JsonSerializer.Deserialize<ObservableCollection<FileDownload>>(json);
+            var downloads = JsonSerializer.Deserialize<ObservableCollection<Download>>(json);
 
             if (downloads != null)
             {
@@ -188,9 +187,9 @@ public partial class DownloadManager : IDisposable
                             if (download.Status == FileDownloadStatuses.Paused)
                             {
                                 _ = this.StartDownloadAsync(download);
-                            }                            
+                            }
                         }
-                    }                    
+                    }
                 }
             }
         }
@@ -226,9 +225,9 @@ public partial class DownloadManager : IDisposable
 
     public void Dispose()
     {
-        var downloadsToPause = new Collection<FileDownload>();
+        var downloadsToPause = new Collection<Download>();
 
-        foreach (FileDownload download in Downloads)
+        foreach (Download download in Downloads)
         {
 
             if (download.Status == FileDownloadStatuses.InProgress)
@@ -237,7 +236,7 @@ public partial class DownloadManager : IDisposable
             }
         }
 
-        foreach (FileDownload downloadToPause in downloadsToPause)
+        foreach (Download downloadToPause in downloadsToPause)
         {
             this.PauseDownload(downloadToPause).ContinueWith((task) =>
             {

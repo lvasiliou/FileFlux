@@ -16,7 +16,7 @@ namespace FileFlux.Services
             this._httpClient.DefaultRequestHeaders.Add("User-Agent", BuildUserAgent());
         }
 
-        public async Task<FileDownload> GetMetadata(Uri uri)
+        public async Task<Download> GetMetadata(Uri uri)
         {
             try
             {
@@ -35,16 +35,16 @@ namespace FileFlux.Services
                 var totalBytes = contentDisposition?.Size ?? response.Content.Headers.ContentLength ?? 0;
                 var lastModified = contentDisposition?.ModificationDate?.UtcDateTime ?? response.Content.Headers.LastModified?.UtcDateTime ?? DateTime.UtcNow;
                 var created = contentDisposition?.CreationDate?.UtcDateTime ?? DateTime.UtcNow;
-                var fileDownload = new FileDownload { Id = Guid.CreateVersion7(), ContentType = contentType, Url = uri, FileName = filename, TotalSize = totalBytes, Status = FileDownloadStatuses.New, LastModified = lastModified, Created = created, SupportsResume = supportsResume, ETag = etag };
+                var fileDownload = new Download { Id = Guid.CreateVersion7(), ContentType = contentType, Url = uri, FileName = filename, TotalSize = totalBytes, Status = FileDownloadStatuses.New, LastModified = lastModified, Created = created, SupportsResume = supportsResume, ETag = etag };
                 return fileDownload;
             }
             catch (Exception ex)
             {
-                return await Task.FromException<FileDownload>(ex);
+                return await Task.FromException<Download>(ex);
             }
         }
 
-        public async Task StartDownloadAsync(FileDownload fileDownload)
+        public async Task StartDownloadAsync(Download fileDownload)
         {
             try
             {
@@ -135,14 +135,14 @@ namespace FileFlux.Services
             }
         }
 
-        public async Task PauseDownload(FileDownload fileDownload)
+        public async Task PauseDownload(Download fileDownload)
         {
             fileDownload.Status = FileDownloadStatuses.Paused;
             await fileDownload.CancellationTokenSource.CancelAsync();
 
         }
 
-        public async Task CancelDownload(FileDownload fileDownload)
+        public async Task CancelDownload(Download fileDownload)
         {
             await fileDownload.CancellationTokenSource.CancelAsync();
             fileDownload.Status = FileDownloadStatuses.Cancelled;

@@ -12,7 +12,7 @@ namespace FileFlux.ViewModel
 {
     public class DownloadsViewModel : BindableObject
     {
-        public ObservableCollection<FileDownload> Downloads { get; }
+        public ObservableCollection<Download> Downloads { get; }
 
         private readonly DownloadManager _downloadManager;
 
@@ -34,13 +34,13 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             NewDownload = new Command(NewDownloadAction);
             this.ClearDownloads = new Command(ClearDownloadsAction);
-            this.CancelDownload = new AsyncRelayCommand<FileDownload>(CancelDownloadAction);
-            this.ToggleDownloadStatus = new AsyncRelayCommand<FileDownload>(ToggleDownloadStatusAction);
-            this.DeleteCommand = new RelayCommand<FileDownload>(DeleteAction);
-            this.OpenFileCommand = new RelayCommand<FileDownload>(OpenAction);            
+            this.CancelDownload = new AsyncRelayCommand<Download>(CancelDownloadAction);
+            this.ToggleDownloadStatus = new AsyncRelayCommand<Download>(ToggleDownloadStatusAction);
+            this.DeleteCommand = new RelayCommand<Download>(DeleteAction);
+            this.OpenFileCommand = new RelayCommand<Download>(OpenAction);            
         }
 
-        private void DeleteAction(FileDownload? fileDownload)
+        private void DeleteAction(Download? fileDownload)
         {
 
             if (fileDownload != null)
@@ -57,7 +57,7 @@ namespace FileFlux.ViewModel
             }
         }
 
-        private void OpenAction(FileDownload fileDownload)
+        private void OpenAction(Download fileDownload)
         {
             if (fileDownload != null && fileDownload.Status == FileDownloadStatuses.Completed)
             {
@@ -67,7 +67,7 @@ namespace FileFlux.ViewModel
             }
         }
 
-        private async Task ToggleDownloadStatusAction(FileDownload? fileDownload)
+        private async Task ToggleDownloadStatusAction(Download? fileDownload)
         {
             if (fileDownload != null)
             {
@@ -83,7 +83,7 @@ namespace FileFlux.ViewModel
             }
         }
 
-        private async Task CancelDownloadAction(FileDownload? fileDownload)
+        private async Task CancelDownloadAction(Download? fileDownload)
         {
             if (fileDownload != null)
             {
