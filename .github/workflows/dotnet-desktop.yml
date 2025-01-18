@@ -16,6 +16,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+          
+      - name: Restore .NET MAUI Workloads
+        run: |
+          dotnet workload install maui-android
+          dotnet workload install maui-desktop
+          dotnet workload install maui-ios
+          dotnet workload install maui-tizen
+
 
       - name: Install dependencies
         run: |
