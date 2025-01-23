@@ -26,29 +26,35 @@ jobs:
       
       - name: Restore dependencies
         run: dotnet restore     
-      - name: Build and Pack
-        run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true
+      
+      - name: Publish
+        run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true      
+      
+      - name: Find Published Artifact
+        id: find-artifact
+        run: |
+          $path = Get-ChildItem -Path ./publish/* -Recurse -Filter "*.msix" | Select-Object -First 1
+          echo "::set-output name=artifact_path::$($path.FullName)"
+        shell: pwsh
 
-      - name: check directory
-        run: Get-ChildItem -Recurse -Path .
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Nightly Build ${{ github.sha }}
+          body: "Nightly Build ${{ github.sha }}"
+          draft: false
+          prerelease: true
 
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
+      - name: Upload Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: build-output
-          path: ./bin/Release/net9.0-windows10.0.26100.0/AppPackages/*.*
-          if-no-files-found: error
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build-output
-          tag-name: ${{ github.ref }}
-          name: Release ${{ github.ref }}
-          body: "Nightly build ${{ github.ref }}"
-#      - uses: "marvinpinto/action-automatic-releases@latest"
-#        with:
-#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-#          automatic_release_tag: "nightly"
-#          prerelease: true
-#          title: "Nightly Build"
-#          files: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.find-artifact.outputs.artifact_path }}
+          asset_name: $(basename ${{ steps.find-artifact.outputs.artifact_path }})
+          asset_content_type: application/octet-stream
