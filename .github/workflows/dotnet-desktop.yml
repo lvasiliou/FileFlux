@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: .\**\AppPackages\**\*.*
+          path: ./bin/Release/net9.0-windows10.0.26100.0/AppPackages/*.*
           if-no-files-found: error
       - name: Create Release
         uses: softprops/action-gh-release@v1
