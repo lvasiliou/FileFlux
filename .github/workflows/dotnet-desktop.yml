@@ -29,6 +29,16 @@ jobs:
       
       - name: Publish
         run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true      
+
+      - name: Determine Version and Tag
+        id: determine-version
+        run: |
+          $version = (Select-String -Path .\FileFlux.csproj -Pattern '<Version>(.*?)</Version>').Matches[0].Groups[1].Value
+          $date = (Get-Date).ToString("yyyyMMdd")
+          $tag = "v$version-$date"
+          echo "tag=$tag" >> $GITHUB_ENV
+          echo "::set-output name=tag::$tag"
+        shell: pwsh
       
       - name: Find Published Artifact
         id: find-artifact
@@ -43,9 +53,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Nightly Build ${{ github.sha }}
-          body: "Nightly Build ${{ github.sha }}"
+          tag_name: ${{ steps.determine-version.outputs.tag }}
+          release_name: Nightly Build ${{ githubsteps.determine-version.outputs.tag }}
+          body: "Nightly Build ${{ steps.determine-version.outputs.tag }}"
           draft: false
           prerelease: true
 
