@@ -30,7 +30,7 @@ jobs:
         run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true
 
       - name: check directory
-        run: dir /S .bin\Release 
+        run: Get-ChildItem -Recurse -Path .
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
