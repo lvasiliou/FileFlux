@@ -25,27 +25,27 @@ jobs:
           dotnet workload install maui-tizen
       
       - name: Restore dependencies
-        run: dotnet restore
-
+        run: dotnet restore     
       - name: Build and Pack
-        run: dotnet publish -f net9.0-windows10.0.26100.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None
+        run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "nightly"
-          prerelease: true
-          title: "Nightly Build"
-          files: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
-
-#      - name: Create Release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: build-output
+          path: .\**\AppPackages\**\*.*
+          if-no-files-found: error
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build-output
+          tag-name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: "Nightly build ${{ github.ref }}"
+#      - uses: "marvinpinto/action-automatic-releases@latest"
 #        with:
-#          tag_name: nightly-build-$(date +%Y-%m-%d)
-#          release_name: Nightly Build $(date +%Y-%m-%d)
-#          draft: false
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          automatic_release_tag: "nightly"
 #          prerelease: true
-#          files: |
-#            ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
+#          title: "Nightly Build"
+#          files: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
