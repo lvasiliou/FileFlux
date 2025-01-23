@@ -54,7 +54,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.determine-version.outputs.tag }}
-          release_name: Nightly Build ${{ githubsteps.determine-version.outputs.tag }}
+          release_name: Nightly Build ${{ steps.determine-version.outputs.tag }}
           body: "Nightly Build ${{ steps.determine-version.outputs.tag }}"
           draft: false
           prerelease: true
