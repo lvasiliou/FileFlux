@@ -17,7 +17,7 @@ namespace FileFlux.ViewModel
 
         public IRelayCommand CancelCommand { get; private set; }
 
-        public IAsyncRelayCommand StartCommand { get; private set; }
+        public IRelayCommand StartCommand { get; private set; }
 
         public IAsyncRelayCommand GetFileCommand { get; private set; }
 
@@ -68,7 +68,7 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             this.CancelCommand = new RelayCommand(CancelAction);
             this.GetFileCommand = new AsyncRelayCommand(GetFileActionAsync);
-            this.StartCommand = new AsyncRelayCommand(StartDownload);
+            this.StartCommand = new RelayCommand(StartDownload);
 
         }
 
@@ -77,7 +77,7 @@ namespace FileFlux.ViewModel
             this.PopModal();
         }
 
-        private async Task StartDownload()
+        private void StartDownload()
         {
             if (this._fileDownload != null)
             {

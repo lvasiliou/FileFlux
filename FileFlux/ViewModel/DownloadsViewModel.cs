@@ -57,7 +57,7 @@ namespace FileFlux.ViewModel
             }
         }
 
-        private void OpenAction(Download fileDownload)
+        private void OpenAction(Download? fileDownload)
         {
             if (fileDownload != null && fileDownload.Status == FileDownloadStatuses.Completed)
             {

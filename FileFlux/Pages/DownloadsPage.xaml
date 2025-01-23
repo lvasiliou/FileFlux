@@ -13,9 +13,7 @@
 			 Title="Downloads - FileFlux">
 	<ContentPage.Resources>
 		<ResourceDictionary>
-			<FontImageSource FontFamily="FAS" Glyph="&#xf15b;" Size="64" Color="{DynamicResource PrimaryColor}" x:Key="FileGenericGlph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf04c;" Color="{DynamicResource PrimaryColor}" x:Key="PauseGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf04b;" Color="{DynamicResource PrimaryColor}" x:Key="ResumeGlyph" />
+			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15b;" Color="{DynamicResource PrimaryColor}" x:Key="FileGenericGlph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c7;" Color="{DynamicResource PrimaryColor}" x:Key="FileAudioGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c8;" Color="{DynamicResource PrimaryColor}" x:Key="FileVideoGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c6;" Color="{DynamicResource PrimaryColor}" x:Key="FileArchiveGlyph" />
@@ -25,6 +23,8 @@
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c4;" Color="{DynamicResource PrimaryColor}" x:Key="FilePowerPointGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c1;" Color="{DynamicResource PrimaryColor}" x:Key="FilePdfGlyph" />
 			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15c;" Color="{DynamicResource PrimaryColor}" x:Key="FileTextGlyph" />
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" Color="{DynamicResource PrimaryColor}" x:Key="PauseGlyph" />
+			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" Color="{DynamicResource PrimaryColor}" x:Key="ResumeGlyph" />			
 		</ResourceDictionary>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 		<local:StatusConverter x:Key="StatusConverter" />
@@ -41,17 +41,8 @@
 			</ToolbarItem.IconImageSource>
 		</ToolbarItem>
 	</ContentPage.ToolbarItems>
-	<Grid>
-		<!-- Define the initial Grid with two columns -->
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="*" x:Name="SecondColumn"/>
-		</Grid.ColumnDefinitions>
-		<ScrollView BackgroundColor="Transparent" Grid.Row="0" Grid.Column="0" x:Name="DownloadsList" Grid.ColumnSpan="2">
+	<toolkit:DockLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" ShouldExpandLastChild="False">
+		<ScrollView BackgroundColor="Transparent" x:Name="DownloadsList" toolkit:DockLayout.DockPosition="None" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
 			<ListView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectionMode="None" CachingStrategy="RecycleElementAndDataTemplate" HorizontalOptions="StartAndExpand">
 				<ListView.ItemTemplate>
 					<DataTemplate x:DataType="model:Download">
@@ -171,47 +162,48 @@
 				</ListView.ItemTemplate>
 			</ListView>
 		</ScrollView>
-		<Border Grid.Row="0" Grid.Column="1" x:Name="PreviewPane" BackgroundColor="Red" Grid.ColumnSpan="0" IsVisible="False">
+		<Border x:Name="PreviewPane" BackgroundColor="Red" MinimumHeightRequest="450" MaximumHeightRequest="450" HeightRequest="450" IsVisible="False" toolkit:DockLayout.DockPosition="None">
 			<Label Text="Second Column Content" />
 		</Border>
-		<VisualStateManager.VisualStateGroups>
-			<VisualStateGroup x:Name="CommonStates">
-				<!-- Visual State for width less than 800px: Hide second column -->
-				<VisualState x:Name="NarrowState">
+		<!--<VisualStateManager.VisualStateGroups>
+			<VisualStateGroup x:Name="WindowStates">
+				<VisualState x:Name="DefaultState">
 					<VisualState.StateTriggers>
-						<AdaptiveTrigger MinWindowWidth="999" />
+						<AdaptiveTrigger MinWindowWidth="801" MinWindowHeight="451" />
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Property="IsVisible" TargetName="PreviewPane" Value="False" />
-						<Setter Property="Grid.ColumnSpan" TargetName="DownloadsList" Value="2" />
+						<Setter Property="IsVisible" TargetName="PreviewPane" Value="False"/>
+						<Setter Property="toolkit:DockLayout.DockPosition" TargetName="PreviewPane" Value="None"/>
 					</VisualState.Setters>
 				</VisualState>
-				<!-- Visual State for width equal to or more than 800px: Show second column -->
-				<VisualState x:Name="WideState">
+				<VisualState x:Name="WindowWide">
 					<VisualState.StateTriggers>
-						<AdaptiveTrigger MinWindowWidth="1000" />
+						<AdaptiveTrigger MinWindowWidth="1200"/>
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Property="IsVisible" TargetName="PreviewPane" Value="True" />
-						<Setter Property="Grid.ColumnSpan" TargetName="PreviewPane" Value="1" />
-						<Setter Property="Grid.Column" TargetName="PreviewPane" Value="1" />
-						<Setter Property="Grid.Row" TargetName="PreviewPane" Value="0" />
-						<Setter Property="Grid.ColumnSpan" TargetName="DownloadsList" Value="1" />
+						<Setter Property="toolkit:DockLayout.DockPosition" TargetName="PreviewPane" Value="Right" />
+						<Setter Property="IsVisible" TargetName="PreviewPane" Value="True"/>
 					</VisualState.Setters>
 				</VisualState>
-				<!-- Visual State for height more than 800px: Shift content to a new row -->
-				<VisualState x:Name="TallState">
+				<VisualState x:Name="WindowTall">
 					<VisualState.StateTriggers>
-						<AdaptiveTrigger MinWindowHeight="800" />
+						<AdaptiveTrigger MinWindowHeight="900"/>
 					</VisualState.StateTriggers>
 					<VisualState.Setters>
-						<Setter Property="Grid.Row" TargetName="PreviewPane" Value="1" />
-						<Setter Property="Grid.Column" TargetName="PreviewPane" Value="0" />
-						<Setter Property="Grid.ColumnSpan" TargetName="PreviewPane" Value="2" />
-						<Setter Property="Grid.ColumnSpan" TargetName="DownloadsList" Value="2" />
+						<Setter Property="toolkit:DockLayout.DockPosition" TargetName="PreviewPane" Value="Bottom"/>
+						<Setter Property="IsVisible" TargetName="PreviewPane" Value="True"/>
+					</VisualState.Setters>
+				</VisualState>
+				<VisualState x:Name="WindowWideAndTall">
+					<VisualState.StateTriggers>
+						<AdaptiveTrigger MinWindowHeight="901" MinWindowWidth="1000"/>
+					</VisualState.StateTriggers>
+					<VisualState.Setters>
+						<Setter Property="toolkit:DockLayout.DockPosition" TargetName="PreviewPane" Value="Bottom"/>
+						<Setter Property="IsVisible" TargetName="PreviewPane" Value="True"/>
 					</VisualState.Setters>
 				</VisualState>
 			</VisualStateGroup>
-		</VisualStateManager.VisualStateGroups>
-	</Grid>
+		</VisualStateManager.VisualStateGroups>-->
+	</toolkit:DockLayout>
 </ContentPage>
