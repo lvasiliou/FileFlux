@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/*
+          path: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/publish/*
           if-no-files-found: error
       - name: Create Release
         uses: softprops/action-gh-release@v1
