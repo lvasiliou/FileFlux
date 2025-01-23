@@ -25,16 +25,15 @@ jobs:
           dotnet workload install maui-tizen
       
       - name: Restore dependencies
-        run: dotnet restore
-
+        run: dotnet restore     
       - name: Build and Pack
-        run: dotnet publish -f net9.0-windows10.0.26100.0 -c Release -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None
+        run: dotnet publish -c Release -f net9.0-windows10.0.26100.0 /p:RuntimeIdentifierOverride=win10-x64 /p:GenerateAppxPackageOnBuild=true
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: ./bin/Release/net9.0-windows10.0.26100.0/win10-x64/publish/*
+          path: .\**\AppPackages\**\*.*
           if-no-files-found: error
       - name: Create Release
         uses: softprops/action-gh-release@v1
