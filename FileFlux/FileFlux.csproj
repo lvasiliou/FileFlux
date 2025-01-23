@@ -53,7 +53,7 @@
 		<Title>FileFlux Download Manager</Title>
 		<NeutralLanguage>en</NeutralLanguage>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
 		<PackageCertificateThumbprint>87FBCD9CC72946A6C4D303CC475F3DFD6B2B045C</PackageCertificateThumbprint>
 		<AppxPackageSigningTimestampDigestAlgorithm>SHA512</AppxPackageSigningTimestampDigestAlgorithm>
 		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
