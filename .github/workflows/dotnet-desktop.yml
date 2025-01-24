@@ -33,7 +33,7 @@ jobs:
       - name: Determine Version and Tag
         id: determine-version
         run: |
-          [xml]$manifest = Get-Content FileFlux/Platforms/Windows/Package.appmanifest
+          [xml]$manifest = Get-Content FileFlux/Platforms/Windows/Package.appxmanifest
           $version = $manifest.Package.Identity          
           $date = (Get-Date).ToString("yyyyMMdd")
           $tag = "v$version-$date"
