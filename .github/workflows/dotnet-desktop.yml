@@ -34,7 +34,7 @@ jobs:
         id: determine-version
         run: |
           [xml]$manifest = Get-Content FileFlux/Platforms/Windows/Package.appxmanifest
-          $version = $manifest.Package.Identity          
+          $version = $manifest.Package.Identity.Version
           $date = (Get-Date).ToString("yyyyMMdd")
           $tag = "v$version-$date"
           echo "tag=$tag" >> $GITHUB_ENV
