@@ -33,7 +33,7 @@ jobs:
       - name: Determine Version and Tag
         id: determine-version
         run: |
-          $version = (Select-String -Path .\FileFlux.csproj -Pattern '<Version>(.*?)</Version>').Matches[0].Groups[1].Value
+          $version = (Select-String -Path /FileFlux/FileFlux.csproj -Pattern '<Version>(.*?)</Version>').Matches[0].Groups[1].Value
           $date = (Get-Date).ToString("yyyyMMdd")
           $tag = "v$version-$date"
           echo "tag=$tag" >> $GITHUB_ENV
