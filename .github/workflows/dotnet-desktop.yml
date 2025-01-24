@@ -46,6 +46,7 @@ jobs:
         run: |
           $path = Get-ChildItem -Path FileFlux/bin/Release/* -Recurse -Filter "*.msix" | Select-Object -First 1
           echo "::set-output name=artifact_path::$($path.FullName)"
+          echo "::set-output name=artifact_name::$(basename $($path.FullName))"
         shell: pwsh
 
       - name: Create GitHub Release
