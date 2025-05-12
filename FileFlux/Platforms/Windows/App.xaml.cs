@@ -79,9 +79,9 @@ public partial class App : MauiWinUIApplication
 
             if (downloadManager != null)
             {
-                string rawUrl = uri.ToString().Replace("fileflux://", string.Empty, StringComparison.OrdinalIgnoreCase);
-                var colonPos = rawUrl.IndexOf("//");
-                var url = rawUrl.Insert(colonPos, ":");
+                string rawUrl = uri.ToString().Replace("fileflux:", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+                var url = Uri.UnescapeDataString(rawUrl);
                 Download? download = downloadManager.NewDownload(url).Result;
                 if (download != null)
                 {

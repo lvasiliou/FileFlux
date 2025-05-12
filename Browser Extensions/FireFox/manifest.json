@@ -1,18 +1,17 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "FileFLux",
   "version": "1.0",
   "description": "Intercepts downloads and redirects them to FileFlux.",
   "permissions": [
     "downloads",
-    "downloads.open",
-    "storage"
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
-  },
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ]
+    "scripts": [ "background.js" ],
+    "persistent": false
+  }
 }

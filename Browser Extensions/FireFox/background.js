@@ -1,39 +1,19 @@
-const isChrome = typeof chrome !== 'undefined' && typeof chrome.downloads !== 'undefined';
-const isFirefox = typeof browser !== 'undefined' && typeof browser.downloads !== 'undefined';
+browser.webRequest.onHeadersReceived.addListener(
+    function (details) {
+        const ranges = details.responseHeaders.find(x => x.name === "Accept-Ranges");
+        const disposition = details.responseHeaders.find(x => x.name === "Content-Disposition");
+        if (ranges !== undefined | disposition != undefined) {
+            const originalUrl = details.url;
+            const encodedUrl = encodeURIComponent(originalUrl);
+            const redirectUrl = `fileflux:${encodedUrl}`;
 
-const downloadsAPI = isChrome ? chrome.downloads : browser.downloads;
-
-// Function to modify the URL and initiate the download with the fileflux:// protocol
-function modifyDownloadUrl(downloadItem) {
-    const originalUrl = downloadItem.finalUrl || downloadItem.url;
-
-    const modifiedUrl = `fileflux://${originalUrl}`;
-
-    if (isChrome) {
-        chrome.tabs.create({ url: modifiedUrl }, (tab) => {
-            console.log("Opened fileflux:// protocol in a new tab, tab ID:", tab.id);
-        });
-    } else if (isFirefox) {
-        browser.tabs.create({ url: modifiedUrl });
-    }
-}
-
-// Add a listener for download requests before the filename is determined
-const downloadDeterminingFilenameListener = (downloadItem, suggest) => {
-    if (downloadItem.url.startsWith('fileflux://')) {
-        return;
-    }
-
-    const originalUrl = downloadItem.finalUrl || downloadItem.url;
-
-
-    const modifiedUrl = `fileflux://${originalUrl}`;
-
-    suggest({ filename: modifiedUrl });
-};
-
-if (isChrome) {
-    chrome.downloads.onDeterminingFilename.addListener(downloadDeterminingFilenameListener);
-} else if (isFirefox) {
-    browser.downloads.onCreated.addListener(modifyDownloadUrl);
-}
+            debugger;
+            return { redirectUrl: redirectUrl };
+        }
+    },
+    {
+        urls: ["<all_urls>"],
+        types: ["main_frame", "sub_frame", "xmlhttprequest", "image", "stylesheet", "script", "object", "other", "download"]        
+    },
+    ["blocking", "responseHeaders"] // Blocking option to cancel the request
+);
