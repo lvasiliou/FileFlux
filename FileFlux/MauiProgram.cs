@@ -34,10 +34,13 @@ namespace FileFlux
             builder.Services.AddSingleton<HttpDownloadService>();
             builder.Services.AddSingleton<SettingsService>();
             builder.Services.AddSingleton<DownloadServiceFactory>();
+            builder.Services.AddSingleton<OriginGuardFactory>();
             builder.Services.AddSingleton<DownloadManager>();
+            builder.Services.AddTransient<HttpOriginGuard>();
             builder.Services.AddTransient<DownloadsViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<NewDownloadViewModel>();
+            
 
             builder.ConfigureLifecycleEvents(events =>
             {

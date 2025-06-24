@@ -13,13 +13,15 @@ public partial class DownloadManager : IDisposable
 {
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
+    private readonly OriginGuardFactory _originGuardFactory;
 
     public ObservableCollection<Download> Downloads = new();
 
-    public DownloadManager(DownloadServiceFactory downloadServiceFactory, SettingsService settingsService)
+    public DownloadManager(DownloadServiceFactory downloadServiceFactory, OriginGuardFactory originGuardFactory, SettingsService settingsService)
     {
         _settingsService = settingsService;
         this._downloadServiceFactory = downloadServiceFactory;
+        this._originGuardFactory = originGuardFactory;
         this.LoadFromDisk();
     }
 
@@ -59,6 +61,9 @@ public partial class DownloadManager : IDisposable
             if (fileDownload != null && fileDownload.Url != null)
             {
                 var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+
+                await this.VerifyDownloadOrigin(fileDownload);
+
                 await _downloadService.StartDownloadAsync(fileDownload);
             }
 
@@ -96,6 +101,9 @@ public partial class DownloadManager : IDisposable
         if (fileDownload != null && fileDownload.Url != null)
         {
             var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
+
+            await this.VerifyDownloadOrigin(fileDownload);
+
             fileDownload.CancellationTokenSource = new();
             await _downloadService.StartDownloadAsync(fileDownload);
         }
@@ -116,11 +124,26 @@ public partial class DownloadManager : IDisposable
 
     }
 
+    public async Task VerifyDownloadOrigin(Download fileDownload)
+    {
+
+        if (fileDownload != null && fileDownload.Url != null && fileDownload.Status == FileDownloadStatuses.Paused)
+        {
+            var originGuard = this._originGuardFactory.GetGuard(fileDownload.Url);
+            var isValid = await originGuard.IsResourceValidAsync(fileDownload);
+
+            if (!isValid)
+            {
+                throw new InvalidOperationException("The file on the server has changed since the download was initiated");
+            }
+        }
+    }
+
     public async Task<bool> VerifyDownload(Download fileDownload, string hash)
     {
         bool verified = false;
 
-        if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.ETag) && !string.IsNullOrWhiteSpace(fileDownload.SavePath))
+        if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.SavePath))
         {
             fileDownload.Status = FileDownloadStatuses.Verifying;
             using (var algo = MD5.Create())
@@ -151,7 +174,7 @@ public partial class DownloadManager : IDisposable
     }
 
     public void SaveToDisk()
-    {        
+    {
         var json = JsonSerializer.Serialize(this.Downloads);
         var localAppDataPath = GetLocalAppDataPath();
         var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
@@ -181,7 +204,8 @@ public partial class DownloadManager : IDisposable
                     if (fileExists)
                     {
                         var fileinfo = new FileInfo(download?.SavePath);
-                        if (fileinfo.Length == download.TotalDownloaded)
+                        var isMultipartDownload = download.Parts.Count > 0;
+                        if (isMultipartDownload | (isMultipartDownload == false & fileinfo.Length == download.TotalDownloaded))
                         {
                             Downloads.Add(download);
                             if (download.Status == FileDownloadStatuses.Paused)

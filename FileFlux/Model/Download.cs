@@ -5,7 +5,11 @@ using System.Text.Json.Serialization;
 namespace FileFlux.Model;
 public class Download : INotifyPropertyChanged
 {
+    [JsonIgnore]
     private CancellationTokenSource _cancellationTokenSource = new();
+
+    public List<DownloadPart> Parts { get; set; } = new List<DownloadPart>();
+
 
     private Guid _id;
     private Uri? _url;
