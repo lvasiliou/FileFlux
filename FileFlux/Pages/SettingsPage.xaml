@@ -6,29 +6,34 @@
              xmlns:strings="clr-namespace:FileFlux.Localization"
              x:DataType="viewmodel:SettingsViewModel"
              Title="Settings - FileFlux">
-    <VerticalStackLayout>
-        <Grid Padding="16" RowSpacing="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <HorizontalStackLayout Spacing="10" HorizontalOptions="FillAndExpand">
-                <Label Text="{x:Static strings:App_Resources.SettingsSaveLocation}"/>
-                <Entry Text="{Binding SaveLocation}" IsReadOnly="True" MinimumWidthRequest="400"/>
-                <Button Text="Browse" Clicked="BrowseSaveLocationCLicked" />
-            </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="10" Grid.Row="1" HorizontalOptions="FillAndExpand">
-                <Label Text="{x:Static strings:App_Resources.SettingsOverwrite}"></Label>
-                <CheckBox IsChecked="{Binding OverwriteBehaviour}" />
-            </HorizontalStackLayout>
+	<VerticalStackLayout>
+		<Grid Padding="16" RowSpacing="16">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<HorizontalStackLayout Spacing="10">
+				<Label Text="{x:Static strings:App_Resources.SettingsSaveLocation}"/>
+				<Entry Text="{Binding SaveLocation}" IsReadOnly="True" MinimumWidthRequest="400"/>
+				<Button Text="Browse" Clicked="BrowseSaveLocationCLicked" />
+			</HorizontalStackLayout>
+			<HorizontalStackLayout Spacing="10" Grid.Row="1">
+				<Label Text="{x:Static strings:App_Resources.SettingsOverwrite}"></Label>
+				<CheckBox IsChecked="{Binding OverwriteBehaviour}" />
+			</HorizontalStackLayout>
+			<HorizontalStackLayout Spacing="10" Grid.Row="2" HorizontalOptions="Start">
+				<Label Text="{x:Static strings:App_Resources.MaxConcurrentSetting}"/>
+				<Entry Text="{Binding MaxConcurrentDownloads}" />
+			</HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="10" Grid.Row="2" HorizontalOptions="EndAndExpand">
-                <Button Text="Close" Clicked="SaveSettingsClicked"/>
-            </HorizontalStackLayout>
-        </Grid>
+			<HorizontalStackLayout Spacing="10" Grid.Row="5" HorizontalOptions="End">
+				<Button Text="Close" Clicked="SaveSettingsClicked"/>
+			</HorizontalStackLayout>
+		</Grid>
 
-    </VerticalStackLayout>
+	</VerticalStackLayout>
 </ContentPage>

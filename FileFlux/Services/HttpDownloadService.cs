@@ -9,9 +9,12 @@ namespace FileFlux.Services
     public class HttpDownloadService : IDownloadService
     {
         private readonly HttpClient _httpClient;
-        public HttpDownloadService(HttpClient httpClient)
+        private readonly SettingsService _settingsService;
+
+        public HttpDownloadService(HttpClient httpClient, SettingsService settingsService)
         {
             this._httpClient = httpClient;
+            this._settingsService = settingsService;
             this._httpClient.DefaultRequestHeaders.Add("User-Agent", BuildUserAgent());
         }
 
@@ -67,7 +70,7 @@ namespace FileFlux.Services
             long totalSize = fileDownload.TotalSize;
             long partSize = totalSize / partsCount;
             FileInfo info = new FileInfo(fileDownload.SavePath);
-            
+
             if (info.Exists == false)
             {
                 File.Create(fileDownload.SavePath, 8192, FileOptions.None).Dispose(); // Ensure the file exists before writing parts.
@@ -106,17 +109,17 @@ namespace FileFlux.Services
         {
             if (fileDownload.Status == FileDownloadStatuses.New)
             {
-                fileDownload.Status = FileDownloadStatuses.InProgress;                
+                fileDownload.Status = FileDownloadStatuses.InProgress;
             }
 
             // If the download was paused, create a new cancellation token.
             if (fileDownload.Status == FileDownloadStatuses.Paused)
             {
-                if(fileDownload.CancellationTokenSource.IsCancellationRequested)
+                if (fileDownload.CancellationTokenSource.IsCancellationRequested)
                 {
                     fileDownload.CancellationTokenSource = new CancellationTokenSource();
                 }
-                
+
                 fileDownload.Status = FileDownloadStatuses.InProgress;
             }
 
@@ -159,7 +162,7 @@ namespace FileFlux.Services
                 response.EnsureSuccessStatusCode();
 
                 using var contentStream = await response.Content.ReadAsStreamAsync();
-                
+
                 using (var fileStream = new FileStream(part.FilePath, FileMode.Append, FileAccess.Write, FileShare.None))
                 {
                     var buffer = new byte[8192];
@@ -208,7 +211,7 @@ namespace FileFlux.Services
                 if (fileDownload.Status == FileDownloadStatuses.Paused)
                 {
                     fileMode = FileMode.Append;
-                    totalRead = fileDownload.TotalDownloaded;                    
+                    totalRead = fileDownload.TotalDownloaded;
                 }
 
                 fileDownload.Status = FileDownloadStatuses.InProgress;
@@ -271,7 +274,8 @@ namespace FileFlux.Services
 
         public int DetermineMaxDownloadParts(Download fileDownload)
         {
-            int defaultMaxParts = 8;
+            int defaultMaxParts = this._settingsService.GetMaxConcurrentDownloads();
+
             if (!fileDownload.SupportsResume)
                 return 1;
 

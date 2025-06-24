@@ -19,7 +19,10 @@ namespace FileFlux.ViewModel
             set => _settingsService.SaveSaveLocation(value);
         }
 
-
-
+        public int MaxConcurrentDownloads
+        {
+            get => _settingsService.GetMaxConcurrentDownloads();
+            set => _settingsService.SaveMaxConcurrentDownloads(value);
+        }
     }
 }

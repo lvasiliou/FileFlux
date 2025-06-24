@@ -142,11 +142,29 @@ namespace FileFlux.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum Download Parts:.
+        /// </summary>
+        internal static string MaxConcurrentSetting {
+            get {
+                return ResourceManager.GetString("MaxConcurrentSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Address:.
         /// </summary>
         internal static string NewDownloadAddress {
             get {
                 return ResourceManager.GetString("NewDownloadAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        internal static string NoString {
+            get {
+                return ResourceManager.GetString("NoString", resourceCulture);
             }
         }
         
@@ -174,6 +192,15 @@ namespace FileFlux.Localization {
         internal static string WindowFailureException {
             get {
                 return ResourceManager.GetString("WindowFailureException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        internal static string YesString {
+            get {
+                return ResourceManager.GetString("YesString", resourceCulture);
             }
         }
     }

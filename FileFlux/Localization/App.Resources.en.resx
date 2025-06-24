@@ -144,8 +144,14 @@
   <data name="ETagMismatchMessage" xml:space="preserve">
     <value>The content on the server has changed since the initial download attempt (ETag mismatch).</value>
   </data>
+  <data name="MaxConcurrentSetting" xml:space="preserve">
+    <value>Maximum Download Parts:</value>
+  </data>
   <data name="NewDownloadAddress" xml:space="preserve">
-    <value>Address</value>
+    <value>Address:</value>
+  </data>
+  <data name="NoString" xml:space="preserve">
+    <value>No</value>
   </data>
   <data name="SettingsOverwrite" xml:space="preserve">
     <value>Overwrite existings files</value>
@@ -155,5 +161,8 @@
   </data>
   <data name="WindowFailureException" xml:space="preserve">
     <value>Failed to create window.</value>
+  </data>
+  <data name="YesString" xml:space="preserve">
+    <value>Yes</value>
   </data>
 </root>

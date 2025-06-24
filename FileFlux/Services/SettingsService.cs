@@ -5,13 +5,16 @@ using FileFlux.Utilities;
 namespace FileFlux.Services
 {
     public class SettingsService
-    { 
+    {
 
         public bool GetOverwriteBehaviour() => GetSetting(Constants.OverwriteBehaviourSettingKey, false);
         public bool SaveOverwriteBehaviour(bool value) => SaveSetting(Constants.OverwriteBehaviourSettingKey, value);
 
-        public string GetSaveLocation() => GetSetting(Constants.SaveLocationSettingKey, Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        public string GetSaveLocation() => Utility.GetDownloadsDirectory();
         public bool SaveSaveLocation(string value) => SaveSetting(Constants.SaveLocationSettingKey, value);
+
+        public int GetMaxConcurrentDownloads() => GetSetting("MaxConcurrentDownloads", 8);
+        public bool SaveMaxConcurrentDownloads(int value) => SaveSetting("MaxConcurrentDownloads", value);
 
         public T GetSetting<T>(string key, T defaultValue)
         {
