@@ -125,7 +125,8 @@ namespace FileFlux.Services
 
             var tasks = fileDownload.Parts
                 .Where(p => !p.Completed)
-                .Select(part => DownloadPartAsync(fileDownload, part));
+                .Select(part => DownloadPartAsync(fileDownload, part))
+                .ToList();
 
             await Task.WhenAll(tasks);
 
