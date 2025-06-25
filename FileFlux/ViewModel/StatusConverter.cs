@@ -15,13 +15,13 @@ public class StatusConverter : IValueConverter
         {
             switch (value)
             {
-                case FileDownloadStatuses.InProgress:
+                case FileDownloadStatuses.Downloading:
                     textVal = App_Resources.DownloadStatusInProgress;
                     break;
-                case FileDownloadStatuses.New:
+                case FileDownloadStatuses.Pending:
                     textVal = App_Resources.DownloadStatusNew;
                     break;
-                case FileDownloadStatuses.Cancelled:
+                case FileDownloadStatuses.Canceled:
                     textVal = App_Resources.DownloadStatusCancelled;
                     break;
                 case FileDownloadStatuses.Failed:
@@ -32,6 +32,12 @@ public class StatusConverter : IValueConverter
                     break;
                 case FileDownloadStatuses.Paused:
                     textVal = App_Resources.DownloadStatusPaused;
+                    break;
+                case FileDownloadStatuses.GetMetadata:
+                    textVal = App_Resources.DownloadStatusGetMetadata;
+                    break;
+                case FileDownloadStatuses.Measuring:
+                    textVal = App_Resources.DownloadStatusMeasuring;
                     break;
             }
         }

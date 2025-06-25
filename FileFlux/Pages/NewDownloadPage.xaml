@@ -13,6 +13,7 @@
 	<ContentPage.Resources>
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 		<local:YesNoBoolConverter x:Key="YesNoConverter" />
+		<local:StatusConverter x:Key="StatusConverter" />
 	</ContentPage.Resources>
 
 	<Grid ColumnSpacing="10" RowSpacing="10" Padding="10">
@@ -49,7 +50,7 @@
 				<Label Text="File Details" FontSize="Caption"/>
 				<Label Text="{Binding FileDownload.FileName, StringFormat='File Name: {0}', TargetNullValue='Filename: unknown'}" FontSize="Small"/>
 				<Label Text="{Binding FileDownload.ContentType, StringFormat='Type: {0}'}" FontSize="Micro"/>
-				<Label Text="{Binding FileDownload.TotalSize, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" FontSize="Micro" />
+				<Label Text="{Binding FileDownload.TotalBytes, Converter={StaticResource FileSizeConverter}, StringFormat='Size: {0}'}" FontSize="Micro" />
 				<Label Text="{Binding FileDownload.SupportsResume, Converter={StaticResource YesNoConverter}, StringFormat='Supports Resume: {0}'}" FontSize="Micro">
 					<Label.Triggers>
 						<DataTrigger TargetType="Label" Binding="{Binding FileDownload.SupportsResume}" Value="False">
@@ -57,6 +58,7 @@
 						</DataTrigger>
 					</Label.Triggers>
 				</Label>
+				<Label Text="{Binding FileDownload.Status, Converter={StaticResource StatusConverter}, StringFormat='Status: {0}'}" FontSize="Micro" />
 				<Label Text="{Binding ErrorMessage, StringFormat='ErrorMessage:{0}'}" FontSize="Micro" TextColor="MediumVioletRed" IsVisible="Collapse" x:Name="ErrorLabel" />
 			</VerticalStackLayout>
 		</Border>
@@ -64,7 +66,7 @@
 		<HorizontalStackLayout Grid.Row="4" Spacing="10" HorizontalOptions="End">
 			<Button Text="Start" Command="{Binding StartCommand}" IsEnabled="False">
 				<Button.Triggers>
-					<DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference newDownloadPage}, Path=BindingContext.DownloadValid}" Value="True">
+					<DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference newDownloadPage}, Path=BindingContext.FileDownload.Status}" Value="{x:Static model:FileDownloadStatuses.Pending}">
 						<Setter Property="IsEnabled" Value="True"/>
 					</DataTrigger>
 				</Button.Triggers>

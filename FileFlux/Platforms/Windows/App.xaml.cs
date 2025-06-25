@@ -82,16 +82,13 @@ public partial class App : MauiWinUIApplication
                 string rawUrl = uri.ToString().Replace("fileflux:", string.Empty, StringComparison.OrdinalIgnoreCase);
 
                 var url = Uri.UnescapeDataString(rawUrl);
-                Download? download = downloadManager.NewDownload(url).Result;
-                if (download != null)
+                var unescapedUri = new Uri(url);
+#if WINDOWS
+                MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    MainThread.InvokeOnMainThreadAsync(() =>
-                    {
-                        downloadManager.AddDownload(download);
-                        _ = downloadManager.StartDownloadAsync(download);
-                    });
-
-                }
+                    _ = downloadManager.NewDownloadAsync(unescapedUri);
+                });
+#endif
             }
         }
     }

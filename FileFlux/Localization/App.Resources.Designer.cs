@@ -106,11 +106,29 @@ namespace FileFlux.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Retrieving File Metadata.
+        /// </summary>
+        internal static string DownloadStatusGetMetadata {
+            get {
+                return ResourceManager.GetString("DownloadStatusGetMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading.
         /// </summary>
         internal static string DownloadStatusInProgress {
             get {
                 return ResourceManager.GetString("DownloadStatusInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measuring Optimal Download Performance.
+        /// </summary>
+        internal static string DownloadStatusMeasuring {
+            get {
+                return ResourceManager.GetString("DownloadStatusMeasuring", resourceCulture);
             }
         }
         
@@ -129,6 +147,15 @@ namespace FileFlux.Localization {
         internal static string DownloadStatusPaused {
             get {
                 return ResourceManager.GetString("DownloadStatusPaused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No downloads to display..
+        /// </summary>
+        internal static string EmptyDownloadsView {
+            get {
+                return ResourceManager.GetString("EmptyDownloadsView", resourceCulture);
             }
         }
         
@@ -169,6 +196,15 @@ namespace FileFlux.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file on the server has changed since the download was initiated..
+        /// </summary>
+        internal static string OriginFailureError {
+            get {
+                return ResourceManager.GetString("OriginFailureError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overwrite existing files.
         /// </summary>
         internal static string SettingsOverwrite {
@@ -183,6 +219,15 @@ namespace FileFlux.Localization {
         internal static string SettingsSaveLocation {
             get {
                 return ResourceManager.GetString("SettingsSaveLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified URI scheme is not supported..
+        /// </summary>
+        internal static string UnsupportedUriError {
+            get {
+                return ResourceManager.GetString("UnsupportedUriError", resourceCulture);
             }
         }
         

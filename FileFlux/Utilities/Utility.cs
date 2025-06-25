@@ -2,6 +2,7 @@
 using FileFlux.Pages;
 using FileFlux.Services;
 using FileFlux.ViewModel;
+
 #if WINDOWS
 using System.Runtime.InteropServices;
 #endif
@@ -25,8 +26,7 @@ namespace FileFlux.Utilities
                     {
                         MainThread.InvokeOnMainThreadAsync(() =>
                         {
-                            downloadManager.AddDownload(fileDownload);
-                            _ = downloadManager.StartDownloadAsync(fileDownload);
+                            _ = downloadManager.ResumeDownloadAsync(fileDownload);
                         });
                     }
 
@@ -50,15 +50,15 @@ namespace FileFlux.Utilities
 
         public static string GetDownloadsDirectory()
         {
-            string? saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            string? saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) ?? string.Empty;
 
 #if WINDOWS
-            var downloadsGuid = new Guid("374DE290-123F-4565-9164-39C4925E467B");
+            var downloadsGuid = new Guid(Constants.DownloadsDirectoryWindowsGuid);
             SHGetKnownFolderPath(downloadsGuid, 0, IntPtr.Zero, out var outPath);
             var path = Marshal.PtrToStringUni(outPath);
             Marshal.FreeCoTaskMem(outPath);
-            saveLocation=path;
-            
+            saveLocation = path;
+
 #elif ANDROID
             saveLocation = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
 #endif

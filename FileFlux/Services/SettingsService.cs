@@ -13,8 +13,8 @@ namespace FileFlux.Services
         public string GetSaveLocation() => Utility.GetDownloadsDirectory();
         public bool SaveSaveLocation(string value) => SaveSetting(Constants.SaveLocationSettingKey, value);
 
-        public int GetMaxConcurrentDownloads() => GetSetting("MaxConcurrentDownloads", 8);
-        public bool SaveMaxConcurrentDownloads(int value) => SaveSetting("MaxConcurrentDownloads", value);
+        public int GetMaxConcurrentDownloads() => GetSetting(Constants.MaxConcurrentDownloadsSettingKey, 8);
+        public bool SaveMaxConcurrentDownloads(int value) => SaveSetting(Constants.MaxConcurrentDownloadsSettingKey, value);
 
         public T GetSetting<T>(string key, T defaultValue)
         {

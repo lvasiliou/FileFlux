@@ -1,34 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-			 xmlns:local="clr-namespace:FileFlux"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"			 
 			 xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
 			 xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"
 			 xmlns:model="clr-namespace:FileFlux.Model"
+			 xmlns:pages="clr-namespace:FileFlux.Pages"
 			 x:DataType="viewmodel:DownloadsViewModel"
 			 xmlns:strings="clr-namespace:FileFlux.Localization"
-			 x:Class="FileFlux.DownloadsPage"             
+			 x:Class="FileFlux.DownloadsPage"             			 
 			 x:Name="downloadsPage"
 			 BackgroundColor="Transparent"
 			 Title="Downloads - FileFlux">
-	<ContentPage.Resources>
-		<ResourceDictionary>
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15b;" Color="{DynamicResource PrimaryColor}" x:Key="FileGenericGlph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c7;" Color="{DynamicResource PrimaryColor}" x:Key="FileAudioGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c8;" Color="{DynamicResource PrimaryColor}" x:Key="FileVideoGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c6;" Color="{DynamicResource PrimaryColor}" x:Key="FileArchiveGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c5;" Color="{DynamicResource PrimaryColor}" x:Key="FileImageGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c2;" Color="{DynamicResource PrimaryColor}" x:Key="FileWordGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c3;" Color="{DynamicResource PrimaryColor}" x:Key="FileExcelGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c4;" Color="{DynamicResource PrimaryColor}" x:Key="FilePowerPointGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c1;" Color="{DynamicResource PrimaryColor}" x:Key="FilePdfGlyph" />
-			<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15c;" Color="{DynamicResource PrimaryColor}" x:Key="FileTextGlyph" />
-			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" Color="{DynamicResource PrimaryColor}" x:Key="PauseGlyph" />
-			<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" Color="{DynamicResource PrimaryColor}" x:Key="ResumeGlyph" />
-		</ResourceDictionary>
-		<local:FileSizeConverter x:Key="FileSizeConverter" />
-		<local:StatusConverter x:Key="StatusConverter" />
-	</ContentPage.Resources>
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Command="{Binding NewDownload}">
 			<ToolbarItem.IconImageSource>
@@ -41,123 +23,35 @@
 			</ToolbarItem.IconImageSource>
 		</ToolbarItem>
 	</ContentPage.ToolbarItems>
-	<ScrollView BackgroundColor="Transparent" x:Name="DownloadsList" HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand">
-		<CollectionView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectionMode="None" HorizontalOptions="StartAndExpand" ItemsLayout="VerticalList">
-			<CollectionView.EmptyViewTemplate>
-				<DataTemplate>
-					<Label Text="No Items to Display"/>
-				</DataTemplate>
-			</CollectionView.EmptyViewTemplate>
+	<ScrollView BackgroundColor="Transparent" x:Name="DownloadsList" >
+		<CollectionView ItemsSource="{Binding Downloads}" BackgroundColor="Transparent" SelectionMode="None" ItemsLayout="VerticalList">
 			<CollectionView.ItemTemplate>
 				<DataTemplate x:DataType="model:Download">
-					<Grid RowSpacing="16" ColumnSpacing="16" Padding="16">
-						<Grid.Behaviors>
-							<toolkit:AnimationBehavior>
-								<toolkit:AnimationBehavior.AnimationType>
-									<toolkit:FadeAnimation/>
-								</toolkit:AnimationBehavior.AnimationType>
-							</toolkit:AnimationBehavior>
-						</Grid.Behaviors>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="*" />
-							<RowDefinition Height="Auto" />
-						</Grid.RowDefinitions>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="Auto"/>
-						</Grid.ColumnDefinitions>
-						<Image Grid.Column="0" Source="{StaticResource Key=FileGenericGlph}">
-							<Image.Triggers>
-								<DataTrigger Binding="{Binding Type}" TargetType="Image" Value="audio">
-									<Setter Property="Source" Value="{StaticResource Key='FileAudioGlyph'}" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding Type}" TargetType="Image" Value="image">
-									<Setter Property="Source" Value="{StaticResource Key=FileImageGlyph}" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding Type}" TargetType="Image" Value="video">
-									<Setter Property="Source" Value="{StaticResource Key=FileVideoGlyph}" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding Type}" TargetType="Image" Value="text">
-									<Setter Property="Source" Value="{StaticResource Key=FileTextGlyph}" />
-								</DataTrigger>
-							</Image.Triggers>
-						</Image>
-						<VerticalStackLayout Grid.Column="1" HorizontalOptions="Start">
-							<Label Text="{Binding FileName}" FontSize="Small" />
-							<Label Text="{Binding Status, Converter={StaticResource StatusConverter}, StringFormat='Status: {0}'}" FontSize="Micro">
-								<Label.Triggers>
-									<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
-										<Setter Property="TextColor" Value="{AppThemeBinding Light=DarkRed, Dark=Red}"/>
-									</DataTrigger>
-									<DataTrigger TargetType="Label" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}">
-										<Setter Property="TextColor" Value="{AppThemeBinding Light=DarkGreen, Dark=LightGreen}"/>
-									</DataTrigger>
-								</Label.Triggers>
-							</Label>
-							<Label Text="{Binding PercentCompleted,StringFormat='Percent Completed: {0:F2}%'}" FontSize="Micro" />
-							<Label Text="{Binding TotalSize, Converter={StaticResource FileSizeConverter}}" FontSize="Micro" />
-						</VerticalStackLayout>
-						<HorizontalStackLayout Spacing="10" Grid.Column="2">
-							<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.CancelDownload}" CommandParameter="{Binding .}" ToolTipProperties.Text="Cancel Download" IsVisible="Collapse">
-								<ImageButton.Triggers>
-									<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.InProgress}">
-										<Setter Property="IsVisible" Value="Visible"/>
-									</DataTrigger>
-									<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Paused}">
-										<Setter Property="IsVisible" Value="Visible"/>
-									</DataTrigger>
-									<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
-										<Setter Property="IsVisible" Value="Visible"/>
-									</DataTrigger>
-								</ImageButton.Triggers>
-								<ImageButton.Source>
-									<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="DarkRed"/>
-								</ImageButton.Source>
-							</ImageButton>
-							<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.ToggleDownloadStatus}" CommandParameter="{Binding .}" IsVisible="Collapse">
-								<ImageButton.Triggers>
-									<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.InProgress}" TargetType="ImageButton">
-										<Setter Property="IsVisible" Value="Visible"/>
-										<Setter Property="ToolTipProperties.Text" Value="Pause Download"/>
-										<Setter Property="Source" Value="{StaticResource Key='PauseGlyph' }"/>
-									</DataTrigger>
-									<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Paused}" TargetType="ImageButton">
-										<Setter Property="IsVisible" Value="Visible"/>
-										<Setter Property="ToolTipProperties.Text" Value="Resume Download"/>
-										<Setter Property="Source" Value="{StaticResource Key='ResumeGlyph' }"/>
-									</DataTrigger>
-									<DataTrigger Binding="{Binding SupportsResume}" Value="True" TargetType="ImageButton">
-										<Setter Property="IsVisible" Value="Visible" />
-									</DataTrigger>
-								</ImageButton.Triggers>
-							</ImageButton>
-							<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage},Path=BindingContext.OpenFileCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Open" IsVisible="Collapse">
-								<ImageButton.Source>
-									<FontImageSource FontFamily="FAS" Glyph="&#xf07c;" Size="18" Color="{DynamicResource PrimaryColor}" />
-								</ImageButton.Source>
-								<ImageButton.Triggers>
-									<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}" TargetType="ImageButton">
-										<Setter Property="IsVisible" Value="Visible"/>
-									</DataTrigger>
-								</ImageButton.Triggers>
-							</ImageButton>
-							<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={x:Reference downloadsPage}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Delete Download" IsVisible="Collapse">
-								<ImageButton.Source>
+					<SwipeView>
+						<SwipeView.RightItems>
+							<SwipeItem Text="Delete"
+									   Command="{Binding BindingContext.DeleteCommand, Source={RelativeSource AncestorType={x:Type viewmodel:DownloadsViewModel}}}">
+								<SwipeItem.IconImageSource>
 									<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf1f8;" Color="{DynamicResource PrimaryColor}" />
-								</ImageButton.Source>
-								<ImageButton.Triggers>
-									<DataTrigger Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}" TargetType="ImageButton">
-										<Setter Property="IsVisible" Value="Visible"/>
-									</DataTrigger>
-								</ImageButton.Triggers>
-							</ImageButton>
-						</HorizontalStackLayout>
-						<BoxView Color="{DynamicResource PrimaryColor}" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="FillAndExpand" HeightRequest="1" Margin="10,0" />
-					</Grid>
+								</SwipeItem.IconImageSource>
+							</SwipeItem>
+							<SwipeItem Text="Open"
+								   Command="{Binding BindingContext.OpenCommand, Source={RelativeSource AncestorType={x:Type viewmodel:DownloadsViewModel}}}">
+								<SwipeItem.IconImageSource>
+									<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf07c;" Color="{DynamicResource PrimaryColor}" />
+								</SwipeItem.IconImageSource>
+							</SwipeItem>
+
+						</SwipeView.RightItems>
+						<pages:DownloadItemTemplate x:Name="DownloadItem" BindingContext="{Binding }" />
+					</SwipeView>
 				</DataTemplate>
 			</CollectionView.ItemTemplate>
+			<CollectionView.EmptyView>
+				<StackLayout>
+					<Label Text="{x:Static strings:App_Resources.EmptyDownloadsView}" FontSize="Small" HorizontalTextAlignment="Center" />
+				</StackLayout>
+			</CollectionView.EmptyView>
 		</CollectionView>
 	</ScrollView>
 </ContentPage>

@@ -19,7 +19,7 @@ namespace FileFlux.Services
             if (download == null)
                 throw new ArgumentNullException(nameof(download));
 
-            var request = new HttpRequestMessage(HttpMethod.Head, download.Url);
+            var request = new HttpRequestMessage(HttpMethod.Head, download.Uri);
 
             if (!string.IsNullOrEmpty(download.ETag))
                 request.Headers.IfMatch.Add(new System.Net.Http.Headers.EntityTagHeaderValue($"\"{download.ETag.Trim('\"')}\""));

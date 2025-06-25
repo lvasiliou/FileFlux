@@ -64,6 +64,9 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/lvasiliou/FileFlux</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PublishAot>False</PublishAot>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<PackageIcon>FileFlux-Logo-128.png</PackageIcon>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
@@ -84,7 +87,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" BaseSize="88,116" />
+		<MauiIcon Include="Resources\AppIcon\fileflux_logo_128.png" BaseSize="88,116" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
@@ -134,6 +137,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Pages\DownloadItemTemplate.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\NewDownloadPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

@@ -132,14 +132,23 @@
   <data name="DownloadStatusFailed" xml:space="preserve">
     <value>Failed</value>
   </data>
+  <data name="DownloadStatusGetMetadata" xml:space="preserve">
+    <value>Retrieving File Metadata</value>
+  </data>
   <data name="DownloadStatusInProgress" xml:space="preserve">
     <value>Downloading</value>
+  </data>
+  <data name="DownloadStatusMeasuring" xml:space="preserve">
+    <value>Measuring Optimal Download Performance</value>
   </data>
   <data name="DownloadStatusNew" xml:space="preserve">
     <value>New</value>
   </data>
   <data name="DownloadStatusPaused" xml:space="preserve">
     <value>Paused</value>
+  </data>
+  <data name="EmptyDownloadsView" xml:space="preserve">
+    <value>No downloads to display.</value>
   </data>
   <data name="ETagMismatchMessage" xml:space="preserve">
     <value>The content on the server has changed since the initial download attempt (ETag mismatch).</value>
@@ -153,11 +162,17 @@
   <data name="NoString" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="OriginFailureError" xml:space="preserve">
+    <value>The file on the server has changed since the download was initiated.</value>
+  </data>
   <data name="SettingsOverwrite" xml:space="preserve">
     <value>Overwrite existings files</value>
   </data>
   <data name="SettingsSaveLocation" xml:space="preserve">
     <value>Save Location:</value>
+  </data>
+  <data name="UnsupportedUriError" xml:space="preserve">
+    <value>The specified URI scheme is not supported.</value>
   </data>
   <data name="WindowFailureException" xml:space="preserve">
     <value>Failed to create window.</value>

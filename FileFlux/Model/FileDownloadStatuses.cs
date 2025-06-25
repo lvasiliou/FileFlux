@@ -1,11 +1,14 @@
 ﻿namespace FileFlux.Model;
 public enum FileDownloadStatuses
 {
-    New,
-    InProgress,
+    Pending,
+    Downloading,
     Completed,
-    Cancelled,
+    Canceled,
     Paused,
     Failed,
-    Verifying
+    Verifying,
+    GetMetadata,
+    Measuring,
+    Merging
 }

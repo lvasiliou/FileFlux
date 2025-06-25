@@ -81,24 +81,15 @@ namespace FileFlux.ViewModel
         {
             if (this._fileDownload != null)
             {
-                _ = this._downloadManager.StartDownloadAsync(this._fileDownload);
-                this._downloadManager.AddDownload(this._fileDownload);
+                _ = this._downloadManager.NewDownloadAsync(this._fileDownload);                
                 this.PopModal();
             }
         }
 
         private async Task GetFileActionAsync()
         {
-            await _downloadManager.NewDownload(this._url).ContinueWith((task) =>
-            {
-                if (task.IsFaulted)
-                {
-                    this.ErrorMessage = task.Exception.Message;
-                    return;
-                }
-
-                this.FileDownload = task.Result;
-            });
+            var uri = new Uri(this._url);
+            this.FileDownload = await _downloadManager.GetMetadataAsync(uri);           
         }
 
         private void PopModal()

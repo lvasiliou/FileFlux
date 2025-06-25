@@ -8,7 +8,7 @@
 		MinimumWidth="800"
 		Title="FileFlux">
 	<Window.TitleBar>
-		<TitleBar Title="FileFlux" HeightRequest="48" Subtitle="Download Manager" Icon="fileflux.png">
+		<TitleBar Title="FileFlux" HeightRequest="48" Subtitle="Download Manager" Icon="filefluxicon.png">
 			<TitleBar.TrailingContent>
 				<HorizontalStackLayout HorizontalOptions="End" Spacing="6">					
 					<ImageButton BackgroundColor="Transparent" BorderWidth="0" x:Name="newDownloadButton">
@@ -21,7 +21,7 @@
 							<FontImageSource FontFamily="FAS" Size="16" Glyph="&#xf51a;" Color="{StaticResource PrimaryColor}" />
 						</ImageButton.Source>
 					</ImageButton>
-					<BoxView VerticalOptions="FillAndExpand" Margin="0,14" Color="{StaticResource PrimaryColor}" WidthRequest="1" MaximumWidthRequest="1" />
+					<BoxView VerticalOptions="Fill" Margin="0,14" Color="{StaticResource PrimaryColor}" WidthRequest="1" MaximumWidthRequest="1" />
 					<ImageButton BackgroundColor="Transparent" BorderWidth="0" Grid.Column="2" x:Name="openSettingsButton">
 						<ImageButton.Source>
 							<FontImageSource FontFamily="FAS" Glyph="&#xf013;" Size="18" Color="{StaticResource PrimaryColor}" />

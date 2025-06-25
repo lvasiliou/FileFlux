@@ -5,6 +5,8 @@ using FileFlux.Services;
 using FileFlux.Utilities;
 
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 
@@ -20,13 +22,17 @@ namespace FileFlux.ViewModel
 
         public ICommand ClearDownloads { get; private set; }
 
-        public IAsyncRelayCommand CancelDownload { get; private set; }
+        private IAsyncRelayCommand? _cancelDownload;
+        public IAsyncRelayCommand CancelDownload => _cancelDownload ??= new AsyncRelayCommand<Download>(CancelDownloadAction);
 
-        public IAsyncRelayCommand ToggleDownloadStatus { get; private set; }
+        private IAsyncRelayCommand? _toggleDownloadStatus;
+        public IAsyncRelayCommand ToggleDownloadStatus => _toggleDownloadStatus ??= new AsyncRelayCommand<Download>(ToggleDownloadStatusAction);
 
-        public IRelayCommand DeleteCommand { get; private set; }
+        private IAsyncRelayCommand? _deleteCommand;
+        public IAsyncRelayCommand DeleteCommand => _deleteCommand ??= new AsyncRelayCommand<Download>(DeleteAction);
 
-        public IRelayCommand OpenFileCommand { get; private set; }
+        private IRelayCommand? _openFileCommand;
+        public IRelayCommand OpenFileCommand => _openFileCommand ??= new RelayCommand<Download>(OpenAction);
 
         public DownloadsViewModel(DownloadManager downloadManager)
         {
@@ -34,26 +40,44 @@ namespace FileFlux.ViewModel
             this._downloadManager = downloadManager;
             NewDownload = new Command(NewDownloadAction);
             this.ClearDownloads = new Command(ClearDownloadsAction);
-            this.CancelDownload = new AsyncRelayCommand<Download>(CancelDownloadAction);
-            this.ToggleDownloadStatus = new AsyncRelayCommand<Download>(ToggleDownloadStatusAction);
-            this.DeleteCommand = new RelayCommand<Download>(DeleteAction);
-            this.OpenFileCommand = new RelayCommand<Download>(OpenAction);            
+            //this.Downloads.CollectionChanged += (object? sender, NotifyCollectionChangedEventArgs args) =>
+            //{
+            //    if (args.NewItems is not null)
+            //    {
+            //        foreach (Download item in args.NewItems)
+            //        {
+            //            item.PropertyChanged += (s, e) =>
+            //            {
+            //                item.PropertyChanged += DownloadChanged;
+            //            };
+            //        }
+            //    }
+
+            //    if (args.OldItems is not null)
+            //    {
+            //        foreach (Download item in args.OldItems)
+            //        {
+            //            item.PropertyChanged -= DownloadChanged;
+            //        }
+            //    }
+            //};
         }
 
-        private void DeleteAction(Download? fileDownload)
+        private void DownloadChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is Download download && e.PropertyName == nameof(Download.Status))
+            {
+                this.ToggleDownloadStatus.NotifyCanExecuteChanged();
+            }
+        }
+
+        private async Task DeleteAction(Download? fileDownload)
         {
 
             if (fileDownload != null)
             {
-                this._downloadManager.RemoveDownload(fileDownload);
-                try
-                {
-                    if (File.Exists(fileDownload.SavePath))
-                    {
-                        File.Delete(fileDownload.SavePath);
-                    }
-                }
-                catch { }
+                await this._downloadManager.CancelDownloadAsync(fileDownload);
+
             }
         }
 
@@ -62,24 +86,41 @@ namespace FileFlux.ViewModel
             if (fileDownload != null && fileDownload.Status == FileDownloadStatuses.Completed)
             {
 #if WINDOWS
-                Process.Start(new ProcessStartInfo(fileDownload.SavePath) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo(fileDownload.FilePath) { UseShellExecute = true });
 #endif
             }
         }
 
+        private bool _isToggling;
+
         private async Task ToggleDownloadStatusAction(Download? fileDownload)
         {
-            if (fileDownload != null)
+            if (_isToggling || fileDownload == null)
+                return;
+
+            _isToggling = true;
+
+            try
             {
                 switch (fileDownload.Status)
                 {
-                    case FileDownloadStatuses.InProgress:
-                        await this._downloadManager.PauseDownload(fileDownload);
+                    case FileDownloadStatuses.Downloading:
+                        await _downloadManager.PauseDownloadAsync(fileDownload);
                         break;
                     case FileDownloadStatuses.Paused:
-                        await this._downloadManager.ResumeDownload(fileDownload);
+                        await _downloadManager.ResumeDownloadAsync(fileDownload);
                         break;
                 }
+
+                _isToggling = false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error toggling download status: {ex.Message}");
+            }
+            finally
+            {
+                _isToggling = false;
             }
         }
 
@@ -87,8 +128,7 @@ namespace FileFlux.ViewModel
         {
             if (fileDownload != null)
             {
-                await this._downloadManager.CancelDownload(fileDownload);
-                this._downloadManager.RemoveDownload(fileDownload);
+                await this._downloadManager.CancelDownloadAsync(fileDownload);
             }
         }
 

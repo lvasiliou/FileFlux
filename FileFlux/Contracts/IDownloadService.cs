@@ -8,8 +8,10 @@ namespace FileFlux.Contracts
 
         public Task StartDownloadAsync(Download fileDownload);
 
-        public Task PauseDownload(Download fileDownload);
+        public Task PauseDownloadAsync(Download fileDownload);
         
-        public Task CancelDownload(Download fileDownload);
+        public Task CancelDownloadAsync(Download fileDownload);
+
+        public Task<(int bufferSize, int chunkCount)> BenchmarkDownloadStrategyAsync(string url, long testBytes);
     }
 }

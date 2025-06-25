@@ -1,4 +1,6 @@
 ﻿using FileFlux.Contracts;
+using FileFlux.Localization;
+using FileFlux.Utilities;
 
 namespace FileFlux.Services
 {
@@ -15,8 +17,8 @@ namespace FileFlux.Services
         {
             return uri.Scheme.ToLower() switch
             {
-                "http" or "https" => this._serviceProvider.GetRequiredService<HttpDownloadService>(),
-                _ => throw new NotSupportedException("The specified URI scheme is not supported.")
+                Constants.HttpScheme or Constants.HttpsScheme => this._serviceProvider.GetRequiredService<HttpDownloadService>(),
+                _ => throw new NotSupportedException(App_Resources.UnsupportedUriError)
             };
 
         }

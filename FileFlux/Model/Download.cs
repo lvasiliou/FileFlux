@@ -1,134 +1,141 @@
-﻿using System.ComponentModel;
+﻿using FileFlux.Utilities;
+
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace FileFlux.Model;
 public class Download : INotifyPropertyChanged
 {
-    [JsonIgnore]
-    private CancellationTokenSource _cancellationTokenSource = new();
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    public List<DownloadPart> Parts { get; set; } = new List<DownloadPart>();
-
-
-    private Guid _id;
-    private Uri? _url;
-    private string? _fileName;
-    private string? _savePath;
-    private double _percentCompleted;
-    private FileDownloadStatuses _status;
-    private string? _contentType;
-    private string? _errorMessage;
-    private long _totalSize;
-    private DateTime _lastModified;
-    private DateTime _created;
-    private long _totalDownloaded;
-    private bool _supportsResume;
-    private string? _eTag;
-
+    private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    private Guid _id = Guid.NewGuid();
     public Guid Id
     {
         get => _id;
-        set => SetProperty(ref _id, value);
+        set { _id = value; OnPropertyChanged(); }
     }
 
-    public Uri? Url
+    private Uri _uri;
+    public Uri Uri
     {
-        get => _url;
-        set => SetProperty(ref _url, value);
+        get => _uri;
+        set { _uri = value; OnPropertyChanged(); }
     }
 
-    public string? FileName
+    private string _fileName = string.Empty;
+    public string FileName
     {
         get => _fileName;
-        set => SetProperty(ref _fileName, value);
+        set { _fileName = value; OnPropertyChanged(); }
     }
 
-    public string? SavePath
+    private string _filePath = string.Empty;
+    public string FilePath
     {
-        get => _savePath;
-        set => SetProperty(ref _savePath, value);
+        get => _filePath;
+        set { _filePath = value; OnPropertyChanged(); }
     }
 
-    public double PercentCompleted
+
+    private long _totalBytes;
+    public long TotalBytes
     {
-        get => _percentCompleted;
-        set => SetProperty(ref _percentCompleted, value);
+        get => _totalBytes;
+        set { _totalBytes = value; OnPropertyChanged(); }
     }
 
-    public FileDownloadStatuses Status
+    private long _bytesDownloaded;
+    public long BytesDownloaded
     {
-        get => _status;
-        set => SetProperty(ref _status, value);
+        get => _bytesDownloaded;
+        set { _bytesDownloaded = value; OnPropertyChanged(); }
     }
 
+    private int _optimalBufferSize = 8192; // Default buffer size
+    public int OptimalBufferSize
+    {
+        get => _optimalBufferSize;
+        set { _optimalBufferSize = value; OnPropertyChanged(); }
+    }
+
+    private string? _contentType;
     public string? ContentType
     {
         get => _contentType;
-        set => SetProperty(ref _contentType, value);
+        set { _contentType = value; OnPropertyChanged(); OnPropertyChanged(nameof(ContentCategory)); }
+    }
+    private double _perrcentCompleted;
+    public double PercentCompleted
+    {
+        get => _perrcentCompleted;
+        set { _perrcentCompleted = value; OnPropertyChanged(); }
     }
 
-    public long TotalSize
-    {
-        get => _totalSize;
-        set => SetProperty(ref _totalSize, value);
-    }
-    public DateTime LastModified
-    {
-        get => _lastModified;
-        set => SetProperty(ref _lastModified, value);
-    }
-
-    public DateTime Created
-    {
-        get => _created;
-        set => SetProperty(ref _created, value);
-    }
-
-    public long TotalDownloaded
-    {
-        get => _totalDownloaded;
-        set => SetProperty(ref _totalDownloaded, value);
-    }
-
-    public string? ErrorMessage
-    {
-        get => _errorMessage;
-        set => SetProperty(ref _errorMessage, value);
-    }
-
+    private bool _supportsResume;
     public bool SupportsResume
     {
         get => _supportsResume;
-        set => SetProperty(ref _supportsResume, value);
+        set { _supportsResume = value; OnPropertyChanged(); }
     }
 
+    private DateTimeOffset? _lastModified;
+    public DateTimeOffset? LastModified
+    {
+        get => _lastModified;
+        set { _lastModified = value; OnPropertyChanged(); }
+    }
+
+    private string? _etag;
     public string? ETag
     {
-        get => _eTag;
-        set => SetProperty(ref _eTag, value);
+        get => _etag;
+        set { _etag = value; OnPropertyChanged(); }
     }
 
-    public string? Type
+    private FileDownloadStatuses _status = FileDownloadStatuses.Pending;
+    public FileDownloadStatuses Status
     {
-        get => this._contentType?.Substring(0,this._contentType.IndexOf('/')) ?? string.Empty;
+        get => _status;
+        set { _status = value; OnPropertyChanged(); }
+    }
+
+    private DateTimeOffset _dateAdded = DateTimeOffset.UtcNow;
+    public DateTimeOffset DateAdded
+    {
+        get => _dateAdded;
+        set { _dateAdded = value; OnPropertyChanged(); }
+    }
+
+    private DateTimeOffset? _dateCrreated;
+    public DateTimeOffset? DateCreated
+    {
+        get => _dateCrreated;
+        set { _dateCrreated = value; OnPropertyChanged(); }
+    }
+
+    private DateTimeOffset? _dateCompleted;
+    public DateTimeOffset? DateCompleted
+    {
+        get => _dateCompleted;
+        set { _dateCompleted = value; OnPropertyChanged(); }
+    }
+
+    private int? _optimalChunks;
+    public int? OptimalChunks
+    {
+        get => _optimalChunks;
+        set { _optimalChunks = value; OnPropertyChanged(); }
     }
 
     [JsonIgnore]
-    public CancellationTokenSource CancellationTokenSource
-    {
-        get => _cancellationTokenSource;
-        set => this._cancellationTokenSource = value;
-    }
+    public CancellationTokenSource CancellationTokenSource { get; set; } = new();
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public List<DownloadPart> Parts { get; set; } = new();
 
-    protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-    {
-        if (!Equals(field, value))
-        {
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
+    // Human-readable content category (e.g., Video, Audio, Document)
+    public string ContentCategory =>
+        ContentTypeCategoryResolver.Resolve(ContentType ?? string.Empty);
 }

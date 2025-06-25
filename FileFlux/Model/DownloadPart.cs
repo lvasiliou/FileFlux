@@ -2,18 +2,13 @@
 {
     public class DownloadPart
     {
-        public int PartNumber { get; set; }
-
-        public long StartByte { get; set; }
-
-        public long EndByte { get; set; }
-
+        public int Index { get; set; }
+        public long Start { get; set; }
+        public long End { get; set; }
+        public string PartFilePath { get; set; } = string.Empty;
+        
         public long DownloadedBytes { get; set; }
 
-        public string FilePath { get; set; }
-
-        public bool Completed { get; set; }
+        public bool Completed { get; set; } = false;
     }
-
-
 }

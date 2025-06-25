@@ -1,11 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.Json;
-
+﻿using FileFlux.Model;
 using FileFlux.Utilities;
 
-using FileFlux.Model;
+using System;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
-
+using System.Text.Json;
 
 namespace FileFlux.Services;
 
@@ -13,7 +12,6 @@ public partial class DownloadManager : IDisposable
 {
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
-    private readonly OriginGuardFactory _originGuardFactory;
 
     public ObservableCollection<Download> Downloads = new();
 
@@ -21,134 +19,122 @@ public partial class DownloadManager : IDisposable
     {
         _settingsService = settingsService;
         this._downloadServiceFactory = downloadServiceFactory;
-        this._originGuardFactory = originGuardFactory;
         this.LoadFromDisk();
     }
 
-    public async Task<Download> NewDownload(string url)
+
+    public async Task NewDownloadAsync(Uri uri)
     {
-        try
-        {
-            var uri = new Uri(url);
-            var _downloadService = this._downloadServiceFactory.GetService(uri);
-            Download fileDownload = await _downloadService.GetMetadata(uri);
+        var _downloadService = this._downloadServiceFactory.GetService(uri);
+        var metadata = await _downloadService.GetMetadata(uri);
+        metadata.Status = FileDownloadStatuses.Pending;
 
-            var filename = fileDownload.FileName;
-            if (!string.IsNullOrWhiteSpace(filename))
-            {
-                var savePathHint = Path.Combine(_settingsService.GetSaveLocation(), filename);
-                if (this._settingsService.GetOverwriteBehaviour() == false)
-                {
-                    savePathHint = EnsureUniqueFileName(savePathHint);
-                }
-
-                fileDownload.FileName = Path.GetFileName(savePathHint);
-
-                fileDownload.SavePath = savePathHint;
-            }
-            return fileDownload;
-        }
-        catch (Exception ex)
-        {
-            return await Task.FromException<Download>(ex);
-        }
+        await this.NewDownloadAsync(metadata);
     }
 
-    public async Task StartDownloadAsync(Download? fileDownload)
+    public async Task NewDownloadAsync(Download download)
     {
-        try
+        if (download == null)
         {
-            if (fileDownload != null && fileDownload.Url != null)
+            throw new ArgumentNullException(nameof(download));
+        }
+
+
+        if (!this.Downloads.Contains(download, new DownloadEqualityComparer()))
+        {
+            this.Downloads.Add(download);
+        }
+
+        var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
+
+        download.CancellationTokenSource = new CancellationTokenSource();
+        
+        var filename = download.FileName;
+        if (!string.IsNullOrWhiteSpace(filename))
+        {
+            var savePathHint = Path.Combine(_settingsService.GetSaveLocation(), filename);
+            if (this._settingsService.GetOverwriteBehaviour() == false)
             {
-                var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-
-                await this.VerifyDownloadOrigin(fileDownload);
-
-                await _downloadService.StartDownloadAsync(fileDownload);
+                savePathHint = EnsureUniqueFileName(savePathHint);
             }
 
+            download.FileName = Path.GetFileName(savePathHint);
+
+            download.FilePath = savePathHint;
         }
-        catch (Exception ex)
+
+        await _downloadService.StartDownloadAsync(download);
+    }
+
+    public async Task<Download> GetMetadataAsync(Uri uri)
+    {
+        var _downloadService = this._downloadServiceFactory.GetService(uri);
+        var download = await _downloadService.GetMetadata(uri);
+
+        _ = Task.Run(async () =>
         {
-            if (fileDownload != null)
+            download.Status = FileDownloadStatuses.Measuring;
+            (download.OptimalBufferSize, download.OptimalChunks) = await _downloadService.BenchmarkDownloadStrategyAsync(uri.ToString(), download.TotalBytes);
+            download.Status = FileDownloadStatuses.Pending;
+        });
+
+        return download;
+    }
+
+    public async Task ResumeDownloadAsync(Download download)
+    {
+        if (download.Status == FileDownloadStatuses.Paused || download.Status == FileDownloadStatuses.Failed)
+        {
+            var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
+            download.CancellationTokenSource = new CancellationTokenSource();
+            await _downloadService.StartDownloadAsync(download);
+        }
+    }
+
+    public async Task PauseDownloadAsync(Download download)
+    {
+        var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
+        await _downloadService.PauseDownloadAsync(download);
+    }
+
+    public async Task CancelDownloadAsync(Download download)
+    {
+        var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
+        await _downloadService.CancelDownloadAsync(download);
+        this.Downloads.Remove(download);
+    }
+
+    public void Dispose()
+    {
+        var downloadsToPause = new Collection<Download>();
+
+        foreach (Download download in Downloads)
+        {
+
+            if (download.Status == FileDownloadStatuses.Downloading)
             {
-                fileDownload.Status = FileDownloadStatuses.Failed;
-                fileDownload.ErrorMessage = ex.Message;
+                downloadsToPause.Add(download);
             }
         }
-    }
 
-    public async Task PauseDownload(Download? fileDownload)
-    {
-        if (fileDownload != null && fileDownload.Url != null)
+        foreach (Download downloadToPause in downloadsToPause)
         {
-            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-            await _downloadService.PauseDownload(fileDownload);
-        }
-    }
-
-    public async Task CancelDownload(Download fileDownload)
-    {
-        if (fileDownload != null && fileDownload.Url != null)
-        {
-            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-            await _downloadService.CancelDownload(fileDownload);
-        }
-    }
-
-    public async Task ResumeDownload(Download fileDownload)
-    {
-        if (fileDownload != null && fileDownload.Url != null)
-        {
-            var _downloadService = this._downloadServiceFactory.GetService(fileDownload.Url);
-
-            await this.VerifyDownloadOrigin(fileDownload);
-
-            fileDownload.CancellationTokenSource = new();
-            await _downloadService.StartDownloadAsync(fileDownload);
-        }
-    }
-    public void AddDownload(Download download)
-    {
-        Downloads.Add(download);
-    }
-
-    public async void RemoveDownload(Download download)
-    {
-        if (download.Status == FileDownloadStatuses.InProgress)
-        {
-            await this.CancelDownload(download);
+            _ = this.PauseDownloadAsync(downloadToPause);
         }
 
-        Downloads.Remove(download);
-
-    }
-
-    public async Task VerifyDownloadOrigin(Download fileDownload)
-    {
-
-        if (fileDownload != null && fileDownload.Url != null && fileDownload.Status == FileDownloadStatuses.Paused)
-        {
-            var originGuard = this._originGuardFactory.GetGuard(fileDownload.Url);
-            var isValid = await originGuard.IsResourceValidAsync(fileDownload);
-
-            if (!isValid)
-            {
-                throw new InvalidOperationException("The file on the server has changed since the download was initiated");
-            }
-        }
+        SaveToDisk();
     }
 
     public async Task<bool> VerifyDownload(Download fileDownload, string hash)
     {
         bool verified = false;
 
-        if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.SavePath))
+        if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.FilePath))
         {
             fileDownload.Status = FileDownloadStatuses.Verifying;
             using (var algo = MD5.Create())
             {
-                using (var fs = new FileStream(fileDownload.SavePath, FileMode.Open))
+                using (var fs = new FileStream(fileDownload.FilePath, FileMode.Open))
                 {
                     fs.Position = 0;
                     byte[] bytes = await algo.ComputeHashAsync(fs);
@@ -161,16 +147,6 @@ public partial class DownloadManager : IDisposable
         }
 
         return verified;
-    }
-
-    public void ClearDownloads()
-    {
-        var itemsToRemove = Downloads.Where(item => item.Status != FileDownloadStatuses.InProgress).ToList();
-
-        foreach (Download fileDownload in itemsToRemove)
-        {
-            Downloads.Remove(fileDownload);
-        }
     }
 
     public void SaveToDisk()
@@ -200,24 +176,25 @@ public partial class DownloadManager : IDisposable
             {
                 foreach (var download in downloads)
                 {
-                    bool fileExists = File.Exists(download.SavePath);
-                    if (fileExists)
+                    var fileinfo = new FileInfo(download?.FilePath);
+
+                    download.CancellationTokenSource = new CancellationTokenSource();
+                    this.Downloads.Add(download);
+                    if (download.Status == FileDownloadStatuses.Paused)
                     {
-                        var fileinfo = new FileInfo(download?.SavePath);
-                        var isMultipartDownload = download.Parts.Count > 0;
-                        if (isMultipartDownload | (isMultipartDownload == false & fileinfo.Length == download.TotalDownloaded))
-                        {
-                            Downloads.Add(download);
-                            if (download.Status == FileDownloadStatuses.Paused)
-                            {
-                                _ = this.StartDownloadAsync(download);
-                            }
-                        }
+                        _ = this.ResumeDownloadAsync(download);
                     }
                 }
             }
         }
     }
+
+    public static string GetLocalAppDataPath()
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Constants.AppLocalDataFolder);
+    }
+
+
 
     public static string EnsureUniqueFileName(string fullPath)
     {
@@ -242,33 +219,13 @@ public partial class DownloadManager : IDisposable
         return newFullPath;
     }
 
-    public static string GetLocalAppDataPath()
+    public void ClearDownloads()
     {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Constants.AppLocalDataFolder);
-    }
+        var itemsToRemove = this.Downloads.Where(item => item.Status != FileDownloadStatuses.Downloading).ToList();
 
-    public void Dispose()
-    {
-        var downloadsToPause = new Collection<Download>();
-
-        foreach (Download download in Downloads)
+        foreach (Download fileDownload in itemsToRemove)
         {
-
-            if (download.Status == FileDownloadStatuses.InProgress)
-            {
-                downloadsToPause.Add(download);
-            }
+            this.Downloads.Remove(fileDownload);
         }
-
-        foreach (Download downloadToPause in downloadsToPause)
-        {
-            this.PauseDownload(downloadToPause).ContinueWith((task) =>
-            {
-                task.Wait();
-            });
-        }
-
-        this.SaveToDisk();
-
     }
 }
