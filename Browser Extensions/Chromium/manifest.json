@@ -1,0 +1,9 @@
+{
+  "name": "FileFlux Download Manager",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["downloads", "nativeMessaging"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

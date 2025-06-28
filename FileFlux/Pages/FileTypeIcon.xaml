@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+			 xmlns:viewmodel="clr-namespace:FileFlux.ViewModel"
+             x:Class="FileFlux.Pages.FileTypeIcon">
+	<ContentView.Resources>
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15b;" Color="{DynamicResource PrimaryColor}" x:Key="FileGenericGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c7;" Color="{DynamicResource PrimaryColor}" x:Key="FileAudioGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c8;" Color="{DynamicResource PrimaryColor}" x:Key="FileVideoGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c6;" Color="{DynamicResource PrimaryColor}" x:Key="FileArchiveGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c5;" Color="{DynamicResource PrimaryColor}" x:Key="FileImageGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c2;" Color="{DynamicResource PrimaryColor}" x:Key="FileWordGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c3;" Color="{DynamicResource PrimaryColor}" x:Key="FileExcelGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c4;" Color="{DynamicResource PrimaryColor}" x:Key="FilePowerPointGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf1c1;" Color="{DynamicResource PrimaryColor}" x:Key="FilePdfGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf15c;" Color="{DynamicResource PrimaryColor}" x:Key="FileTextGlyph" />
+		<FontImageSource FontFamily="FAS" Size="64" Glyph="&#xf51f;" Color="{DynamicResource PrimaryColor}" x:Key="IsoFileGlyph" />
+		<viewmodel:HeightToFontSizeConverter x:Key="HeightToFontConverter" />
+	</ContentView.Resources>
+	<Image Grid.Row="1" x:Name="IconImage">
+		<Image.Source>
+			<FontImageSource FontFamily="FAS"
+							 Size="{Binding Source={x:Reference IconImage}, Path=Height, Converter={StaticResource HeightToFontSizeConverter}}"
+							 Color="{DynamicResource PrimaryColor}"
+							 Glyph="{Binding Path=ContentCategory}">
+			</FontImageSource>
+		</Image.Source>
+		<Image.Triggers>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Audio">
+				<Setter Property="Source" Value="{StaticResource Key=FileAudioGlyph}" />
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Image">
+				<Setter Property="Source" Value="{StaticResource Key=FileImageGlyph}" />
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Video">
+				<Setter Property="Source" Value="{StaticResource Key=FileVideoGlyph}" />
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Text">
+				<Setter Property="Source" Value="{StaticResource Key=FileTextGlyph}" />
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Document">
+				<Setter Property="Source" Value="{StaticResource Key=FileGenericGlyph}" />				
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="Unknown">
+				<Setter Property="Source" Value="{StaticResource Key=FileGenericGlyph}" />
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Path=ContentCategory}" TargetType="Image" Value="ISO">
+				<Setter Property="Source" Value="{StaticResource Key=IsoFileGlyph}" />
+			</DataTrigger>
+		</Image.Triggers>
+	</Image>
+</ContentView>

@@ -73,8 +73,11 @@ public partial class DownloadManager : IDisposable
 
         _ = Task.Run(async () =>
         {
-            download.Status = FileDownloadStatuses.Measuring;
-            (download.OptimalBufferSize, download.OptimalChunks) = await _downloadService.BenchmarkDownloadStrategyAsync(uri.ToString(), download.TotalBytes);
+            if (download.SupportsResume)
+            {
+                download.Status = FileDownloadStatuses.Measuring;
+                (download.OptimalBufferSize, download.OptimalChunks) = await _downloadService.BenchmarkDownloadStrategyAsync(uri.ToString(), download.TotalBytes);
+            }
             download.Status = FileDownloadStatuses.Pending;
         });
 

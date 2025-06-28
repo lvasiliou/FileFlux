@@ -140,6 +140,9 @@
 		<MauiXaml Update="Pages\DownloadItemTemplate.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Pages\FileTypeIcon.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\NewDownloadPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

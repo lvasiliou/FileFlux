@@ -13,6 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FireFox", "FireFox", "{B378
 		Browser Extensions\FireFox\manifest.json = Browser Extensions\FireFox\manifest.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chromium", "Chromium", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Browser Extensions\Chromium\background.js = Browser Extensions\Chromium\background.js
+		Browser Extensions\Chromium\manifest.json = Browser Extensions\Chromium\manifest.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +36,9 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B37801F3-B115-43C4-B77D-75113623DCC0} = {D4DA098A-2316-475B-B3E3-36B45A66F41C}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {D4DA098A-2316-475B-B3E3-36B45A66F41C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {05E03D6C-E1EF-4938-9BA9-4EA5EEC62BC0}
 	EndGlobalSection
 EndGlobal

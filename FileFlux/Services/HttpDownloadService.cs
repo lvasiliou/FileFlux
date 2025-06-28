@@ -31,7 +31,7 @@
             var contentDisposition = response.Content.Headers.ContentDisposition;
             var totalBytes = contentDisposition?.Size ?? response.Content.Headers.ContentLength ?? 0;
 
-            var fileName = Path.GetFileName(uri.LocalPath);          
+            var fileName = Path.GetFileName(uri.LocalPath);
 
 
             var download = new Download
@@ -46,13 +46,16 @@
                 DateCreated = contentDisposition?.CreationDate?.UtcDateTime ?? DateTime.UtcNow,
                 DateAdded = DateTimeOffset.UtcNow,
                 Status = FileDownloadStatuses.GetMetadata
-            };          
+            };
 
             return download;
         }
 
         public async Task StartDownloadAsync(Download download)
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
+
             download.Status = FileDownloadStatuses.Downloading;
 
             if (!await _originGuard.IsResourceValidAsync(download))
@@ -130,6 +133,9 @@
 
             download.Status = FileDownloadStatuses.Completed;
             download.DateCompleted = DateTimeOffset.UtcNow;
+            sw.Stop();
+            Debug.WriteLine($"Download completed in {sw.ElapsedMilliseconds} ms");
+
         }
 
         private async Task DownloadPartAsync(Download download, DownloadPart part)
@@ -192,21 +198,28 @@
         public async Task<(int bufferSize, int chunkCount)> BenchmarkDownloadStrategyAsync(string url, long fileSizeBytes)
         {
             int[] bufferSizes = { 8192, 16384, 32768, 65536, 131072 };
-            int bestBufferSize = 8192;
+            int bestBufferSize = this.GetOptimalBufferSize(fileSizeBytes);
             double bestSpeedMbps = 0;
+            int chunkCount = 1;
 
-            foreach (int bufferSize in bufferSizes)
+            double defaultBufferSpeed = await MeasureDownloadSpeedAsync(url, bestBufferSize);
+            double estimatedSeconds = (fileSizeBytes * 8) / (defaultBufferSpeed * 1_000_000);
+            if (estimatedSeconds > 60)
             {
-                var speed = await MeasureDownloadSpeedAsync(url, bufferSize);
-                if (speed > bestSpeedMbps)
-                {
-                    bestSpeedMbps = speed;
-                    bestBufferSize = bufferSize;
-                }
-            }
 
-            var targetChunkSize = Math.Clamp((long)(bestSpeedMbps * 125_000), 5 * 1024 * 1024, 20 * 1024 * 1024);
-            int chunkCount = (int)Math.Clamp(fileSizeBytes / targetChunkSize, 1, Environment.ProcessorCount);
+                foreach (int bufferSize in bufferSizes)
+                {
+                    var speed = await MeasureDownloadSpeedAsync(url, bufferSize);
+                    if (speed > bestSpeedMbps)
+                    {
+                        bestSpeedMbps = speed;
+                        bestBufferSize = bufferSize;
+                    }
+                }
+
+                var targetChunkSize = Math.Clamp((long)(bestSpeedMbps * 125_000), 5 * 1024 * 1024, 20 * 1024 * 1024);
+                chunkCount = (int)Math.Clamp(fileSizeBytes / targetChunkSize, 1, Environment.ProcessorCount);
+            }
 
             return (bestBufferSize, chunkCount);
         }
@@ -239,6 +252,14 @@
             {
                 return 0; // fallback if failed
             }
+        }
+
+        private int GetOptimalBufferSize(long fileSizeBytes)
+        {
+            if (fileSizeBytes < 1 * 1024 * 1024) return 8192;         // < 1MB
+            if (fileSizeBytes < 10 * 1024 * 1024) return 16384;       // 1–10MB
+            if (fileSizeBytes < 50 * 1024 * 1024) return 32768;       // 10–50MB
+            return 65536;                                             // > 50MB
         }
     }
 }
