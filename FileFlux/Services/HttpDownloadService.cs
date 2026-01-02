@@ -53,89 +53,101 @@
 
         public async Task StartDownloadAsync(Download download)
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Start();
-
-            download.Status = FileDownloadStatuses.Downloading;
-
-            if (!await _originGuard.IsResourceValidAsync(download))
+            try
             {
-                download.Status = FileDownloadStatuses.Failed;
-                return;
-            }
-            int bufferSize = download.OptimalBufferSize;
-            int chunks = download.OptimalChunks ?? _maxDegreeOfParallelism;
+                Stopwatch sw = Stopwatch.StartNew();
+                sw.Start();
 
+                download.Status = FileDownloadStatuses.Downloading;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(download.FilePath)!);
-
-            File.Create(download.FilePath).Close(); // Ensure the file exists
-
-            var useParts = download.SupportsResume && chunks > 1;
-
-            if (!useParts)
-            {
-                using var response = await _httpClient.GetAsync(download.Uri, HttpCompletionOption.ResponseHeadersRead, download.CancellationTokenSource.Token);
-                response.EnsureSuccessStatusCode();
-
-                using var contentStream = await response.Content.ReadAsStreamAsync(download.CancellationTokenSource.Token);
-
-                var buffer = new byte[download.OptimalBufferSize];
-                int bytesRead;
-
-                using (var fileStream = new FileStream(download.FilePath, FileMode.Append, FileAccess.Write, FileShare.None))
+                if (!await _originGuard.IsResourceValidAsync(download))
                 {
+                    download.Status = FileDownloadStatuses.Failed;
+                    return;
+                }
+                int bufferSize = download.OptimalBufferSize;
+                int chunks = download.OptimalChunks ?? _maxDegreeOfParallelism;
 
-                    while ((bytesRead = await contentStream.ReadAsync(buffer.AsMemory(0, buffer.Length), download.CancellationTokenSource.Token)) > 0)
+
+                Directory.CreateDirectory(Path.GetDirectoryName(download.FilePath)!);
+
+                File.Create(download.FilePath).Close(); // Ensure the file exists
+
+                var useParts = download.SupportsResume && chunks > 1;
+
+                if (!useParts)
+                {
+                    using var response = await _httpClient.GetAsync(download.Uri, HttpCompletionOption.ResponseHeadersRead, download.CancellationTokenSource.Token);
+                    response.EnsureSuccessStatusCode();
+
+                    using var contentStream = await response.Content.ReadAsStreamAsync(download.CancellationTokenSource.Token);
+
+                    var buffer = new byte[download.OptimalBufferSize];
+                    int bytesRead;
+
+                    using (var fileStream = new FileStream(download.FilePath, FileMode.Append, FileAccess.Write, FileShare.None))
                     {
 
-                        await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), download.CancellationTokenSource.Token);
-                        download.BytesDownloaded += bytesRead;
+                        while ((bytesRead = await contentStream.ReadAsync(buffer.AsMemory(0, buffer.Length), download.CancellationTokenSource.Token)) > 0)
+                        {
+
+                            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), download.CancellationTokenSource.Token);
+                            download.BytesDownloaded += bytesRead;
 
 
-                        double percent = (double)download.BytesDownloaded / download.TotalBytes * 100;
-                        download.PercentCompleted = percent;
+                            double percent = (double)download.BytesDownloaded / download.TotalBytes * 100;
+                            download.PercentCompleted = percent;
+                        }
                     }
                 }
-            }
-            else
-            {
-                int partCount = chunks;
-                long partSize = download.TotalBytes / partCount;
-                download.Parts.Clear();
-
-                for (int i = 0; i < partCount; i++)
+                else
                 {
-                    long start = i * partSize;
-                    long end = (i == partCount - 1) ? download.TotalBytes - 1 : (start + partSize - 1);
-                    download.Parts.Add(new DownloadPart
+                    int partCount = chunks;
+                    long partSize = download.TotalBytes / partCount;
+                    download.Parts.Clear();
+
+                    for (int i = 0; i < partCount; i++)
                     {
-                        Index = i,
-                        Start = start,
-                        End = end,
-                        PartFilePath = download.FilePath + $".part{i}"
-                    });
+                        long start = i * partSize;
+                        long end = (i == partCount - 1) ? download.TotalBytes - 1 : (start + partSize - 1);
+                        download.Parts.Add(new DownloadPart
+                        {
+                            Index = i,
+                            Start = start,
+                            End = end,
+                            PartFilePath = download.FilePath + $".part{i}"
+                        });
+                    }
+
+                    var tasks = download.Parts.Select(p => DownloadPartAsync(download, p)).ToList();
+                    await Task.WhenAll(tasks);
+
+                    download.Status = FileDownloadStatuses.Merging;
+                    using var output = new FileStream(download.FilePath, FileMode.Create, FileAccess.Write);
+                    foreach (var part in download.Parts.OrderBy(p => p.Index))
+                    {
+                        using var partStream = new FileStream(part.PartFilePath, FileMode.Open);
+                        await partStream.CopyToAsync(output);
+                        partStream.Close();
+                        File.Delete(part.PartFilePath);
+                    }
                 }
 
-                var tasks = download.Parts.Select(p => DownloadPartAsync(download, p)).ToList();
-                await Task.WhenAll(tasks);
-
-                download.Status = FileDownloadStatuses.Merging;
-                using var output = new FileStream(download.FilePath, FileMode.Create, FileAccess.Write);
-                foreach (var part in download.Parts.OrderBy(p => p.Index))
-                {
-                    using var partStream = new FileStream(part.PartFilePath, FileMode.Open);
-                    await partStream.CopyToAsync(output);
-                    partStream.Close();
-                    File.Delete(part.PartFilePath);
-                }
+                download.Status = FileDownloadStatuses.Completed;
+                download.DateCompleted = DateTimeOffset.UtcNow;
+                sw.Stop();
+                Debug.WriteLine($"Download completed in {sw.ElapsedMilliseconds} ms");
             }
-
-            download.Status = FileDownloadStatuses.Completed;
-            download.DateCompleted = DateTimeOffset.UtcNow;
-            sw.Stop();
-            Debug.WriteLine($"Download completed in {sw.ElapsedMilliseconds} ms");
-
+            catch(OperationCanceledException)
+            {
+                download.Status = FileDownloadStatuses.Canceled;                
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Download failed: {ex.Message}");
+                download.Status = FileDownloadStatuses.Failed;
+                download.ErrorMessage = ex.Message;
+            }
         }
 
         private async Task DownloadPartAsync(Download download, DownloadPart part)

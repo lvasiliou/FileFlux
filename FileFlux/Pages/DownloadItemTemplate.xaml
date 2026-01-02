@@ -10,6 +10,8 @@
 	<ContentView.Resources>
 		<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04c;" Color="{DynamicResource PrimaryColor}" x:Key="PauseGlyph" />
 		<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf04b;" Color="{DynamicResource PrimaryColor}" x:Key="ResumeGlyph" />
+		<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xe185;" Color="{DynamicResource PrimaryColor}" x:Key="ShowInFolderGlyph" />
+		<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="DarkRed" x:Key="CancelGlyph" />
 		<local:FileSizeConverter x:Key="FileSizeConverter" />
 		<local:StatusConverter x:Key="StatusConverter" />
 	</ContentView.Resources>
@@ -47,6 +49,7 @@
 			</Label>
 			<Label Text="{Binding PercentCompleted,StringFormat='Percent Completed: {0:F2}%'}" FontSize="Micro" />
 			<Label Text="{Binding TotalBytes, Converter={StaticResource FileSizeConverter}}" FontSize="Micro" />
+			<Label Text="{Binding ErrorMessage}" FontSize="Micro" />
 		</VerticalStackLayout>
 		<HorizontalStackLayout Spacing="10" Grid.Column="2">
 			<ImageButton BackgroundColor="Transparent"
@@ -55,6 +58,7 @@
 						 CommandParameter="{Binding .}"
 						 ToolTipProperties.Text="Cancel Download"
 						 IsVisible="False"
+						 Source="{x:StaticResource CancelGlyph}"
 						 InputTransparent="False">
 				<ImageButton.Triggers>
 					<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Downloading}">
@@ -66,10 +70,7 @@
 					<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
 						<Setter Property="IsVisible" Value="True"/>
 					</DataTrigger>
-				</ImageButton.Triggers>
-				<ImageButton.Source>
-					<FontImageSource FontFamily="FAS" Size="18" Glyph="&#xf05e;" Color="DarkRed"/>
-				</ImageButton.Source>
+				</ImageButton.Triggers>				
 			</ImageButton>
 			<ImageButton BackgroundColor="Transparent"
 						 BorderWidth="0"
@@ -98,6 +99,7 @@
 					</MultiTrigger>
 				</ImageButton.Triggers>
 			</ImageButton>
+			<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={RelativeSource AncestorType={x:Type local:DownloadsPage}}, Path=BindingContext.ShowInFolderCommand}" CommandParameter="{Binding .}" InputTransparent="False" Source="{x:StaticResource ShowInFolderGlyph}"/>
 			<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={RelativeSource AncestorType={x:Type local:DownloadsPage}}, Path=BindingContext.OpenFileCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Open" IsVisible="False" InputTransparent="False">
 				<ImageButton.Source>
 					<FontImageSource FontFamily="FAS" Glyph="&#xf07c;" Size="18" Color="{DynamicResource PrimaryColor}" />

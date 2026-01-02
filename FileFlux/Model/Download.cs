@@ -12,14 +12,15 @@ public class Download : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     private Guid _id = Guid.NewGuid();
+
     public Guid Id
     {
         get => _id;
         set { _id = value; OnPropertyChanged(); }
     }
 
-    private Uri _uri;
-    public Uri Uri
+    private Uri? _uri;
+    public Uri? Uri
     {
         get => _uri;
         set { _uri = value; OnPropertyChanged(); }
@@ -128,6 +129,15 @@ public class Download : INotifyPropertyChanged
     {
         get => _optimalChunks;
         set { _optimalChunks = value; OnPropertyChanged(); }
+    }
+
+    private string? _errorMessage;
+
+    [JsonIgnore]
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        set { _errorMessage = value; OnPropertyChanged(); }
     }
 
     [JsonIgnore]

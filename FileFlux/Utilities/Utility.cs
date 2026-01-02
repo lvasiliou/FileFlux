@@ -50,20 +50,23 @@ namespace FileFlux.Utilities
 
         public static string GetDownloadsDirectory()
         {
-            string? saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) ?? string.Empty;
+            string saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
 #if WINDOWS
             var downloadsGuid = new Guid(Constants.DownloadsDirectoryWindowsGuid);
             SHGetKnownFolderPath(downloadsGuid, 0, IntPtr.Zero, out var outPath);
             var path = Marshal.PtrToStringUni(outPath);
             Marshal.FreeCoTaskMem(outPath);
-            saveLocation = path;
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                saveLocation = path;
+            }
 
 #elif ANDROID
             saveLocation = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
 #endif
 
-            return saveLocation;
+                return saveLocation;
+            }
         }
     }
-}

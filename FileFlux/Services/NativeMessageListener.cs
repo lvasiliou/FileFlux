@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-
-namespace FileFlux.Services
+﻿namespace FileFlux.Services
 {
     public sealed class NativeMessageListener
     {
         private static readonly Lazy<NativeMessageListener> _instance =
-            new Lazy<NativeMessageListener>(() => new NativeMessageListener());
+            new(() => new NativeMessageListener());
 
         private bool _isListening;
 
@@ -14,7 +11,7 @@ namespace FileFlux.Services
 
         private NativeMessageListener() { }
 
-        public event EventHandler<string> MessageReceived;
+        public event EventHandler<string>? MessageReceived;
 
         public void StartListening()
         {

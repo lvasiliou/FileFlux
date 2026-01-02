@@ -3,11 +3,6 @@
     "Windows Machine": {
       "commandName": "MsixPackage",
       "nativeDebugging": false
-    },
-    "ArgumentsP": {
-      "commandName": "Project",
-      "commandLineArgs": "fileflux://https%3A%2F%2Fofficecdn.microsoft.com%2Fdb%2F492350F6-3A01-4F97-B9C0-C7C6DDF67D60%2Fmedia%2Far-SA%2FHomeBusiness2021Retail.img",
-      "authenticationMode": "None"
     }
   }
 }

@@ -1,10 +1,10 @@
 ﻿using FileFlux.Model;
 using FileFlux.Utilities;
 
-using System;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FileFlux.Services;
 
@@ -13,7 +13,7 @@ public partial class DownloadManager : IDisposable
     private readonly SettingsService _settingsService;
     private readonly DownloadServiceFactory _downloadServiceFactory;
 
-    public ObservableCollection<Download> Downloads = new();
+    public ObservableCollection<Download> Downloads =[];
 
     public DownloadManager(DownloadServiceFactory downloadServiceFactory, OriginGuardFactory originGuardFactory, SettingsService settingsService)
     {
@@ -34,7 +34,7 @@ public partial class DownloadManager : IDisposable
 
     public async Task NewDownloadAsync(Download download)
     {
-        if (download == null)
+        if (download == null || download.Uri == null)
         {
             throw new ArgumentNullException(nameof(download));
         }
@@ -48,7 +48,7 @@ public partial class DownloadManager : IDisposable
         var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
 
         download.CancellationTokenSource = new CancellationTokenSource();
-        
+
         var filename = download.FileName;
         if (!string.IsNullOrWhiteSpace(filename))
         {
@@ -86,8 +86,13 @@ public partial class DownloadManager : IDisposable
 
     public async Task ResumeDownloadAsync(Download download)
     {
-        if (download.Status == FileDownloadStatuses.Paused || download.Status == FileDownloadStatuses.Failed)
+        if (download == null || download.Uri == null)
         {
+            throw new NullReferenceException("Download or Download URI cannot be null.");
+        }
+
+        if (download.Status == FileDownloadStatuses.Paused || download.Status == FileDownloadStatuses.Failed)
+        {            
             var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
             download.CancellationTokenSource = new CancellationTokenSource();
             await _downloadService.StartDownloadAsync(download);
@@ -96,12 +101,22 @@ public partial class DownloadManager : IDisposable
 
     public async Task PauseDownloadAsync(Download download)
     {
+        if (download == null || download.Uri == null)
+        {
+            throw new NullReferenceException("Download or Download URI cannot be null.");
+        }
+
         var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
         await _downloadService.PauseDownloadAsync(download);
     }
 
     public async Task CancelDownloadAsync(Download download)
     {
+        if (download == null || download.Uri == null)
+        {
+            throw new NullReferenceException("Download or Download URI cannot be null.");
+        }
+
         var _downloadService = this._downloadServiceFactory.GetService(download.Uri);
         await _downloadService.CancelDownloadAsync(download);
         this.Downloads.Remove(download);
@@ -109,6 +124,8 @@ public partial class DownloadManager : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
+
         var downloadsToPause = new Collection<Download>();
 
         foreach (Download download in Downloads)
@@ -126,22 +143,23 @@ public partial class DownloadManager : IDisposable
         }
 
         SaveToDisk();
+        
     }
 
-    public async Task<bool> VerifyDownload(Download fileDownload, string hash)
+    public static async Task<bool> VerifyDownload(Download fileDownload, string hash)
     {
         bool verified = false;
 
         if (fileDownload != null && !string.IsNullOrWhiteSpace(fileDownload.FilePath))
         {
             fileDownload.Status = FileDownloadStatuses.Verifying;
-            using (var algo = MD5.Create())
+            using var algo = MD5.Create();
             {
                 using (var fs = new FileStream(fileDownload.FilePath, FileMode.Open))
                 {
                     fs.Position = 0;
                     byte[] bytes = await algo.ComputeHashAsync(fs);
-                    string computeHash = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLowerInvariant();
+                    string computeHash =Convert.ToHexStringLower(bytes).Replace("-", string.Empty).ToLowerInvariant();
                     string normalisedHash = hash.Replace("0x", string.Empty).ToLowerInvariant();
                     bool comparison = string.Compare(computeHash, normalisedHash, StringComparison.OrdinalIgnoreCase) == 0;
                     verified = comparison;
@@ -152,9 +170,12 @@ public partial class DownloadManager : IDisposable
         return verified;
     }
 
+    // Add a static JsonSerializerContext for source generation
+    private static readonly FileFluxJsonContext _jsonContext = new ();
+
     public void SaveToDisk()
     {
-        var json = JsonSerializer.Serialize(this.Downloads);
+        var json = JsonSerializer.Serialize(this.Downloads, _jsonContext.ObservableCollectionDownload);
         var localAppDataPath = GetLocalAppDataPath();
         var filePath = Path.Combine(localAppDataPath, Constants.DownloadsPersistenceFileName);
         var directoryName = Path.GetDirectoryName(filePath) ?? string.Empty;
@@ -173,13 +194,12 @@ public partial class DownloadManager : IDisposable
         if (File.Exists(filePath))
         {
             var json = File.ReadAllText(filePath);
-            var downloads = JsonSerializer.Deserialize<ObservableCollection<Download>>(json);
+            var downloads = JsonSerializer.Deserialize(json, _jsonContext.ObservableCollectionDownload) as ObservableCollection<Download>;
 
             if (downloads != null)
             {
                 foreach (var download in downloads)
                 {
-                    var fileinfo = new FileInfo(download?.FilePath);
 
                     download.CancellationTokenSource = new CancellationTokenSource();
                     this.Downloads.Add(download);
@@ -231,4 +251,11 @@ public partial class DownloadManager : IDisposable
             this.Downloads.Remove(fileDownload);
         }
     }
+}
+
+// Add this source generation context in the same file or a new file
+[JsonSourceGenerationOptions(WriteIndented = false)]
+[JsonSerializable(typeof(ObservableCollection<Download>))]
+internal partial class FileFluxJsonContext : JsonSerializerContext
+{
 }

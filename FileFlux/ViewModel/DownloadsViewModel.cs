@@ -34,6 +34,9 @@ namespace FileFlux.ViewModel
         private IRelayCommand? _openFileCommand;
         public IRelayCommand OpenFileCommand => _openFileCommand ??= new RelayCommand<Download>(OpenAction);
 
+        private IRelayCommand? _showInFolderCommand;
+        public IRelayCommand ShowInFolderCommand => _showInFolderCommand ??= new RelayCommand<Download>(ShowInFolderAction);
+
         public DownloadsViewModel(DownloadManager downloadManager)
         {
             Downloads = downloadManager.Downloads;
@@ -88,6 +91,20 @@ namespace FileFlux.ViewModel
 #if WINDOWS
                 Process.Start(new ProcessStartInfo(fileDownload.FilePath) { UseShellExecute = true });
 #endif
+            }
+        }
+
+        private void ShowInFolderAction(Download? download)
+        {
+            if (download != null && download.Status == FileDownloadStatuses.Completed)
+            {
+#if WINDOWS
+                if (File.Exists(download.FilePath))
+                {
+                    var argument = $"/select,\"{download.FilePath}\"";
+                    Process.Start("explorer.exe", argument);
+                }
+                #endif
             }
         }
 

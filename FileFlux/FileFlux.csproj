@@ -11,18 +11,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.26100.0</TargetFrameworks>
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
-
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->		
-
+		<TargetFrameworks>net10.0-windows10.0.22621.0</TargetFrameworks>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>FileFlux</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -42,13 +31,9 @@
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
-
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">16.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>		
+		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</TargetPlatformVersion>
 		<DefaultLanguage>en</DefaultLanguage>
 		<Title>FileFlux Download Manager</Title>
 		<NeutralLanguage>en</NeutralLanguage>
@@ -67,21 +52,11 @@
 		<PublishAot>False</PublishAot>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<PackageIcon>FileFlux-Logo-128.png</PackageIcon>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
+	</PropertyGroup>	
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.26100.0|AnyCPU'">
 	  <ApplicationId>FileFlux</ApplicationId>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.26100.0|AnyCPU'">
-	  <ApplicationId>FileFlux</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
-	  <ApplicationId>FileFlux</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.26100.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.26100.0|AnyCPU'">
 	  <ApplicationId>FileFlux</ApplicationId>
 	</PropertyGroup>
 
@@ -111,11 +86,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="11.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="13.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
