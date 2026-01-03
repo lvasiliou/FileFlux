@@ -70,7 +70,7 @@
 					<DataTrigger TargetType="ImageButton" Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Failed}">
 						<Setter Property="IsVisible" Value="True"/>
 					</DataTrigger>
-				</ImageButton.Triggers>				
+				</ImageButton.Triggers>
 			</ImageButton>
 			<ImageButton BackgroundColor="Transparent"
 						 BorderWidth="0"
@@ -99,7 +99,16 @@
 					</MultiTrigger>
 				</ImageButton.Triggers>
 			</ImageButton>
-			<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={RelativeSource AncestorType={x:Type local:DownloadsPage}}, Path=BindingContext.ShowInFolderCommand}" CommandParameter="{Binding .}" InputTransparent="False" Source="{x:StaticResource ShowInFolderGlyph}"/>
+			<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={RelativeSource AncestorType={x:Type local:DownloadsPage}}, Path=BindingContext.ShowInFolderCommand}" CommandParameter="{Binding .}" InputTransparent="False" Source="{x:StaticResource ShowInFolderGlyph}" IsVisible="Collapse">
+				<ImageButton.Triggers>					
+					<MultiTrigger TargetType="ImageButton">
+						<MultiTrigger.Conditions>
+							<BindingCondition Binding="{Binding Status}" Value="{x:Static model:FileDownloadStatuses.Completed}" />
+						</MultiTrigger.Conditions>
+						<Setter Property="IsVisible" Value="True"/>
+					</MultiTrigger>
+				</ImageButton.Triggers>
+			</ImageButton>
 			<ImageButton BackgroundColor="Transparent" BorderWidth="0" Command="{Binding Source={RelativeSource AncestorType={x:Type local:DownloadsPage}}, Path=BindingContext.OpenFileCommand}" CommandParameter="{Binding .}" ToolTipProperties.Text="Open" IsVisible="False" InputTransparent="False">
 				<ImageButton.Source>
 					<FontImageSource FontFamily="FAS" Glyph="&#xf07c;" Size="18" Color="{DynamicResource PrimaryColor}" />

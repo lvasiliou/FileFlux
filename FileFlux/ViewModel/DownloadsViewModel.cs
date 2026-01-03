@@ -104,41 +104,25 @@ namespace FileFlux.ViewModel
                     var argument = $"/select,\"{download.FilePath}\"";
                     Process.Start("explorer.exe", argument);
                 }
-                #endif
+#endif
             }
         }
 
-        private bool _isToggling;
-
         private async Task ToggleDownloadStatusAction(Download? fileDownload)
         {
-            if (_isToggling || fileDownload == null)
+            if (fileDownload == null)
                 return;
 
-            _isToggling = true;
+            switch (fileDownload.Status)
+            {
+                case FileDownloadStatuses.Downloading:
+                    await _downloadManager.PauseDownloadAsync(fileDownload);
+                    break;
+                case FileDownloadStatuses.Paused:
+                    await _downloadManager.ResumeDownloadAsync(fileDownload);
+                    break;
+            }
 
-            try
-            {
-                switch (fileDownload.Status)
-                {
-                    case FileDownloadStatuses.Downloading:
-                        await _downloadManager.PauseDownloadAsync(fileDownload);
-                        break;
-                    case FileDownloadStatuses.Paused:
-                        await _downloadManager.ResumeDownloadAsync(fileDownload);
-                        break;
-                }
-
-                _isToggling = false;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error toggling download status: {ex.Message}");
-            }
-            finally
-            {
-                _isToggling = false;
-            }
         }
 
         private async Task CancelDownloadAction(Download? fileDownload)
