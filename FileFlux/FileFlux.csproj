@@ -29,12 +29,13 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<!-- Unpackaged Windows app. Relies on the system-installed Windows App
-		     Runtime (installed alongside VS's WinAppSDK component, or available
-		     standalone at https://aka.ms/windowsappsdk). Self-contained mode is
-		     intentionally off because it requires the MSVC C++ Desktop workload. -->
+		<!-- Unpackaged, framework-dependent Windows app. Relies on the
+		     system-installed Windows App Runtime (installed with VS's WinAppSDK
+		     component, or via https://aka.ms/windowsappsdk). Self-contained mode
+		     is explicitly disabled because the WinAppSDK 1.8 default flips it
+		     on, which requires the MSVC C++ Desktop workload. -->
 		<WindowsPackageType>None</WindowsPackageType>
-		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">win-x64</RuntimeIdentifiers>
+		<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
 		
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>		
 		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</TargetPlatformVersion>
@@ -101,6 +102,9 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.60" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.7" />
+		<!-- Framework-dependent unpackaged WinAppSDK: app activates against the
+		     system-installed runtime instead of bundling its own. -->
+		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="1.8.260101001" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
 	</ItemGroup>
 
 	<ItemGroup>
